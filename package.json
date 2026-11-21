@@ -1,0 +1,1 @@
+{"name":"steel-design-erp-android","version":"8.0.0","private":true,"description":"STEEL DESIGN ERP V8 Android application","scripts":{"android:sync":"cap sync android","android:open":"cap open android"},"dependencies":{"@capacitor/android":"8.6.2","@capacitor/core":"8.6.2"},"devDependencies":{"@capacitor/cli":"8.6.2"}}
