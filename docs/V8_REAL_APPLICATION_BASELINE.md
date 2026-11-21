@@ -1,6 +1,6 @@
 # STEEL DESIGN ERP V8.0 — Real Application Baseline
 
-**Status:** V7.11 editable source archive received and audited; V8 implementation and APK build are not yet verified.  
+**Status:** V7.11 editable source archive recovered and audited; V8 implementation and APK build are not yet verified.  
 **Branch:** `v8-real-app`  
 **Rule:** Never label a build as V8 or distribute it as installable until the source project builds successfully and the resulting APK is tested on a real Android device.
 
@@ -78,7 +78,7 @@ Build a working workshop ERP for Android tablet and Windows office use. It must 
 
 ## 10. Acceptance gates before calling it V8.0
 
-1. Obtain and inspect the complete editable source project (the uploaded V1.1 APK is a compiled artifact, not the source project).
+1. Preserve the recovered V7.11 editable source archive as the baseline (the uploaded V1.1 APK is a compiled artifact, not the source project).
 2. Identify the exact current web/app framework, database and Android wrapper.
 3. Create a clean V8 source tree and document reproducible build steps.
 4. Implement persistent storage and tested backup/restore.
@@ -92,8 +92,8 @@ Build a working workshop ERP for Android tablet and Windows office use. It must 
 
 The current repository contains a README, two ZIP build packages and a GitHub Actions workflow. The workflow extracts `STEEL_DESIGN_ERP_ANDROID_V7_11_BUILD_PACKAGE.zip`, runs npm/Capacitor setup, then builds an APK labelled V1.1. The uploaded `STEEL-DESIGN-ERP-APK-V1.1.zip` previously inspected in this project contained only `app-debug.apk`, not editable source files.
 
-The uploaded V7.11 ZIP was inspected. It contains an editable single-file web application (`www/index.html`), Capacitor configuration and package manifest, but no native Android project. The source recovery audit is recorded in `docs/V7_11_SOURCE_RECOVERY_AUDIT.md`. Do not assume that the existing workflow produces V8.
+The uploaded V7.11 ZIP was opened and inspected: nine entries, including an editable single-file web application (`www/index.html`), Capacitor configuration, package manifest, Arabic README and build workflow. The inline JavaScript syntax check passed. It contains no native Android project. The source recovery audit is recorded in `docs/V7_11_SOURCE_RECOVERY_AUDIT.md`. The app relies on localStorage, its face-recognition assets load remotely, Android printing uses `window.print()` without a native bridge, and no LAN synchronization layer was found. These are audit findings, not completed V8 fixes. Do not assume that the existing workflow produces V8.
 
 ## 12. Next technical action
 
-Preserve the recovered V7.11 source as a baseline, then migrate it into a maintainable V8 structure. Prioritize durable storage, backup/restore, offline operation and regression tests before replacing the Android build workflow. Do not overwrite the `main` branch or legacy packages.
+Preserve the recovered V7.11 archive unchanged as a baseline, then migrate it into a maintainable V8 structure. First priority is durable storage with migration and backup/restore tests; next are offline packaging and Android printing verification. Define LAN synchronization before implementing multi-device writes. Do not overwrite the `main` branch or legacy packages.
