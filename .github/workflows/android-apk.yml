@@ -34,12 +34,10 @@ jobs:
         with:
           packages: platform-tools
 
-      - name: Extract project package
+      - name: Extract V7.11 package
         run: |
           mkdir -p project
-          unzip -q STEEL_DESIGN_ERP_ANDROID_BUILD_PACKAGE.zip -d project
-          echo "Package files:"
-          find project -maxdepth 4 -type f | head -200
+          unzip -q STEEL_DESIGN_ERP_ANDROID_V7_11_BUILD_PACKAGE.zip -d project
 
       - name: Locate application
         id: app
@@ -47,32 +45,26 @@ jobs:
         run: |
           PACKAGE_FILE="$(find project -name package.json -type f | head -n 1)"
           if [ -z "$PACKAGE_FILE" ]; then
-            echo "ERROR: package.json not found in ZIP"
+            echo "package.json not found"
             exit 1
           fi
-          APP_DIR="$(dirname "$PACKAGE_FILE")"
-          echo "dir=$APP_DIR" >> "$GITHUB_OUTPUT"
-          echo "Application folder: $APP_DIR"
+          echo "dir=$(dirname "$PACKAGE_FILE")" >> "$GITHUB_OUTPUT"
 
       - name: Install and prepare Android
         working-directory: ${{ steps.app.outputs.dir }}
-        shell: bash
         run: |
           npm install
-
-          if [ ! -f capacitor.config.json ] && [ ! -f capacitor.config.ts ] && [ ! -f capacitor.config.js ]; then
-            if [ ! -d www ]; then
-              echo "ERROR: www folder not found"
-              exit 1
-            fi
-            npx cap init "STEEL DESIGN ERP" "com.steeldesignerp.app" --web-dir=www
-          fi
-
           if [ ! -d android ]; then
             npx cap add android
           fi
-
           npx cap sync android
+
+      - name: Set Android update version
+        working-directory: ${{ steps.app.outputs.dir }}/android
+        run: |
+          sed -i -E 's/versionCode[[:space:]]+[0-9]+/versionCode 2/' app/build.gradle
+          sed -i -E 's/versionName[[:space:]]+"[^"]+"/versionName "1.1"/' app/build.gradle
+          grep -nE 'versionCode|versionName' app/build.gradle
 
       - name: Build Android APK
         working-directory: ${{ steps.app.outputs.dir }}/android
@@ -83,7 +75,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: STEEL-DESIGN-ERP-APK
+          name: STEEL-DESIGN-ERP-APK-V1.1
           path: ${{ steps.app.outputs.dir }}/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
