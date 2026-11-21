@@ -1,6 +1,6 @@
 # STEEL DESIGN ERP V8.0 — Real Application Baseline
 
-**Status:** Planning baseline committed; application source and APK build are not yet verified.  
+**Status:** V7.11 editable source archive received and audited; V8 implementation and APK build are not yet verified.  
 **Branch:** `v8-real-app`  
 **Rule:** Never label a build as V8 or distribute it as installable until the source project builds successfully and the resulting APK is tested on a real Android device.
 
@@ -92,8 +92,8 @@ Build a working workshop ERP for Android tablet and Windows office use. It must 
 
 The current repository contains a README, two ZIP build packages and a GitHub Actions workflow. The workflow extracts `STEEL_DESIGN_ERP_ANDROID_V7_11_BUILD_PACKAGE.zip`, runs npm/Capacitor setup, then builds an APK labelled V1.1. The uploaded `STEEL-DESIGN-ERP-APK-V1.1.zip` previously inspected in this project contained only `app-debug.apk`, not editable source files.
 
-The two repository ZIP files have not yet been inspected in this session. Therefore their contents and whether either contains the complete source project remain **unverified**. Do not assume that the existing workflow produces V8.
+The uploaded V7.11 ZIP was inspected. It contains an editable single-file web application (`www/index.html`), Capacitor configuration and package manifest, but no native Android project. The source recovery audit is recorded in `docs/V7_11_SOURCE_RECOVERY_AUDIT.md`. Do not assume that the existing workflow produces V8.
 
 ## 12. Next technical action
 
-Inspect and recover the editable project source from the existing V7.11 build package (or obtain the source archive from the project owner), then establish the actual application structure before replacing the old build workflow. Do not overwrite the `main` branch or legacy packages during this recovery.
+Preserve the recovered V7.11 source as a baseline, then migrate it into a maintainable V8 structure. Prioritize durable storage, backup/restore, offline operation and regression tests before replacing the Android build workflow. Do not overwrite the `main` branch or legacy packages.
