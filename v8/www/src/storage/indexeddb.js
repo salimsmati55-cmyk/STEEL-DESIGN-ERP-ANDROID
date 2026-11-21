@@ -93,21 +93,21 @@ export async function migrateLegacyLocalStorage(storage = globalThis.localStorag
     const records = tx.objectStore(STORE_RECORDS);
     const meta = tx.objectStore(STORE_META);
     const marker = await requestResult(meta.get('legacy-v7-migration-v1'));
-    if (marker?.complete) {
-      await done;
-      return { migrated: 0, skipped: true, completedAt: marker.completedAt };
-    }
     let migrated = 0;
     for (const key of LEGACY_KEYS) {
       const raw = storage.getItem(key);
       if (raw === null) continue;
+      const existing = await requestResult(records.get(key));
+      if (existing !== undefined) continue;
       records.put({ raw, format: 'legacy-localStorage-json-or-text', migratedAt: new Date().toISOString() }, key);
       migrated += 1;
     }
     const completedAt = new Date().toISOString();
-    meta.put({ complete: true, migrated, completedAt, source: 'V7.11 localStorage' }, 'legacy-v7-migration-v1');
+    if (migrated > 0 || marker?.complete) {
+      meta.put({ complete: true, migrated: (marker?.migrated || 0) + migrated, completedAt, source: 'V7.11 localStorage' }, 'legacy-v7-migration-v1');
+    }
     await done;
-    return { migrated, skipped: false, completedAt };
+    return { migrated, skipped: migrated === 0, completedAt };
   } finally { db.close(); }
 }
 
