@@ -7,6 +7,9 @@
 - Arabic RTL responsive application shell for tablet and desktop.
 - IndexedDB application state and draft persistence.
 - Conservative copy of the known V7.11 localStorage keys into the V8 records store; original localStorage values are not deleted.
+- Automatic first-run import of V7.11 orders and customers into the V8 schema. Existing V8 orders/customers are merged by ID/name+phone rather than overwritten.
+- Full raw V7.11 records and legacy modules (workers, attendance, suppliers, debts, payroll, catalogue, columns, press-brake settings, sequence, and draft) are retained in a separate IndexedDB archive for later module migration.
+- Import is retry-safe when no V7.11 data is present yet; original localStorage is never cleared.
 - Customer registration and customer quick suggestions during order entry.
 - REC raw-material receipt entry and stock creation.
 - Inventory tracking with the agreed A (receiving/waiting), B (approved for production), and C (finished/ready) locations, including location changes.
@@ -31,5 +34,5 @@ The current migration stage preserves V7.11 values as raw serialized records. It
 ## Next engineering steps
 1. Run/inspect the Android Actions build and fix any build errors.
 2. Browser runtime tests: create/reload order, draft recovery including sketch, status update, OF/BON printing, backup round-trip, and migration idempotence.
-3. Map and safely convert V7.11 order/customer records without deleting the legacy copy.
+3. Test the V7.11 order/customer conversion and inspect the archived legacy modules on a real browser profile.
 4. Continue inventory and REC workflows, then the other modules.
