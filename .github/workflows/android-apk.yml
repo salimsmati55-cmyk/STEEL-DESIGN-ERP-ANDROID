@@ -15,48 +15,68 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      - name: Setup Java
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
 
-      - name: Setup Android SDK
+      - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
 
       - name: Extract project package
         run: |
-          mkdir project
+          mkdir -p project
           unzip -q STEEL_DESIGN_ERP_ANDROID_BUILD_PACKAGE.zip -d project
-          find project -name package.json
+          echo "Package files:"
+          find project -maxdepth 4 -type f | head -200
 
       - name: Locate application
+        id: app
+        shell: bash
         run: |
-          APP_DIR=$(dirname "$(find project -name package.json | head -n 1)")
-          test -n "$APP_DIR"
-          echo "APP_DIR=$APP_DIR" >> "$GITHUB_ENV"
+          PACKAGE_FILE="$(find project -name package.json -type f | head -n 1)"
+          if [ -z "$PACKAGE_FILE" ]; then
+            echo "ERROR: package.json not found in ZIP"
+            exit 1
+          fi
+          APP_DIR="$(dirname "$PACKAGE_FILE")"
+          echo "dir=$APP_DIR" >> "$GITHUB_OUTPUT"
+          echo "Application folder: $APP_DIR"
 
       - name: Install and prepare Android
+        working-directory: ${{ steps.app.outputs.dir }}
+        shell: bash
         run: |
-          cd "$APP_DIR"
           npm install
+
           if [ ! -f capacitor.config.json ] && [ ! -f capacitor.config.ts ] && [ ! -f capacitor.config.js ]; then
+            if [ ! -d www ]; then
+              echo "ERROR: www folder not found"
+              exit 1
+            fi
             npx cap init "STEEL DESIGN ERP" "com.steeldesignerp.app" --web-dir=www
           fi
-          npx cap add android
+
+          if [ ! -d android ]; then
+            npx cap add android
+          fi
+
           npx cap sync android
 
-      - name: Build APK
+      - name: Build Android APK
+        working-directory: ${{ steps.app.outputs.dir }}/android
         run: |
-          cd "$APP_DIR/android"
           chmod +x gradlew
           ./gradlew assembleDebug
 
@@ -64,5 +84,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: STEEL-DESIGN-ERP-APK
-          path: ${{ env.APP_DIR }}/android/app/build/outputs/apk/debug/app-debug.apk
+          path: ${{ steps.app.outputs.dir }}/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+          retention-days: 14
