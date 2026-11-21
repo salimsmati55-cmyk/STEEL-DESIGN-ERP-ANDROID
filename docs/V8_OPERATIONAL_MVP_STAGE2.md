@@ -8,6 +8,8 @@
 - IndexedDB application state and draft persistence.
 - Conservative copy of the known V7.11 localStorage keys into the V8 records store; original localStorage values are not deleted.
 - Customer registration and customer quick suggestions during order entry.
+- REC raw-material receipt entry and stock creation.
+- Inventory tracking with the agreed A (receiving/waiting), B (approved for production), and C (finished/ready) locations, including location changes.
 - Order entry for the workshop's six main service categories.
 - Material, thickness, dimensions, quantity, notes, and expected completion date calculated from start date plus selected duration.
 - Touch/stylus sketch canvas; sketch data is saved with the draft and order.
