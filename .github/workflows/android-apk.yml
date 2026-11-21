@@ -1,0 +1,68 @@
+
+name: Build STEEL DESIGN ERP Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Extract project package
+        run: |
+          mkdir project
+          unzip -q STEEL_DESIGN_ERP_ANDROID_BUILD_PACKAGE.zip -d project
+          find project -name package.json
+
+      - name: Locate application
+        run: |
+          APP_DIR=$(dirname "$(find project -name package.json | head -n 1)")
+          test -n "$APP_DIR"
+          echo "APP_DIR=$APP_DIR" >> "$GITHUB_ENV"
+
+      - name: Install and prepare Android
+        run: |
+          cd "$APP_DIR"
+          npm install
+          if [ ! -f capacitor.config.json ] && [ ! -f capacitor.config.ts ] && [ ! -f capacitor.config.js ]; then
+            npx cap init "STEEL DESIGN ERP" "com.steeldesignerp.app" --web-dir=www
+          fi
+          npx cap add android
+          npx cap sync android
+
+      - name: Build APK
+        run: |
+          cd "$APP_DIR/android"
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: STEEL-DESIGN-ERP-APK
+          path: ${{ env.APP_DIR }}/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
