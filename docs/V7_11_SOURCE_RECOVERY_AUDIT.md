@@ -2,14 +2,19 @@
 
 **Date:** 2026-11-21  
 **Source archive:** STEEL_DESIGN_ERP_ANDROID_V7_11_BUILD_PACKAGE.zip  
-**Result:** Archive is readable and contains editable web application source.
+**Result:** The uploaded archive was opened successfully; it contains nine ZIP entries and an editable single-file web application source.
 
 ## Files verified
-- `www/index.html` — 175,215 bytes in the ZIP; contains the application UI, CSS and a large inline JavaScript application.
+- `www/index.html` — 175,215 bytes in the ZIP (about 157,031 decoded characters); contains the application UI, inline CSS and a large inline JavaScript application.
 - `package.json` — Capacitor 8.6.2 dependencies and scripts.
 - `capacitor.config.json` — app ID `com.steeldesign.erp`, app name and `www` web directory.
 - `.github/workflows/android-apk.yml` — workflow intended to generate the Android project and build a debug APK.
 - `README_AR.md` — documents V7.11 unified print preview and known Android printing limitation.
+
+## Checks performed
+- ZIP integrity and entry listing: passed.
+- Extracted inline JavaScript syntax check using Node: passed.
+- This was a source inspection, not an end-to-end browser, Android, printer, or physical-device test.
 
 ## Functional code observed
 - Persistent records use browser `localStorage`: orders, customers, workers, sequence, draft, attendance, biometric/passkey data, face profiles, suppliers, supplier debts, payroll and catalogue.
