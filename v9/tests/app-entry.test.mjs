@@ -37,3 +37,11 @@ test("V9 exposes customer, supplier, purchasing and supplier settlement workflow
   assert.match(app, /Core\.recordSupplierPayment/);
   assert.match(app, /store:"stockLots"/);
 });
+
+test("production job detail includes controlled material issue and remnant flows", async () => {
+ const app = await readFile(new URL("../www/app-v9.js", import.meta.url), "utf8");
+ assert.match(app, /Core\.issueStockToJob/);
+ assert.match(app, /Core\.recordRemnant/);
+ assert.match(app, /store:"stockMovements"/);
+ assert.match(app, /store:"remnants"/);
+});
