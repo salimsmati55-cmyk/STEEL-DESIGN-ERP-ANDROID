@@ -22,6 +22,52 @@ export function createEvent(type, aggregateId, payload = {}, actorId = "system",
   return { id: id("EVT"), type, aggregateId, payload: clone(payload), actorId, at, schemaVersion: SCHEMA_VERSION };
 }
 
+
+export function createCustomer(input, at = nowISO()) {
+  const name = String(required(input.name, "Customer name")).trim();
+  const customer = { id: input.id ?? id("CUS"), name, phone: String(input.phone ?? "").trim(), address: String(input.address ?? "").trim(), notes: String(input.notes ?? "").trim(), createdAt: at, updatedAt: at, active: true, schemaVersion: SCHEMA_VERSION };
+  return { customer, event: createEvent("CustomerCreated", customer.id, { name }, input.actorId, at) };
+}
+
+export function createSupplier(input, at = nowISO()) {
+  const name = String(required(input.name, "Supplier name")).trim();
+  const supplier = { id: input.id ?? id("SUP"), name, phone: String(input.phone ?? "").trim(), address: String(input.address ?? "").trim(), taxId: String(input.taxId ?? "").trim(), notes: String(input.notes ?? "").trim(), openBalance: 0, createdAt: at, updatedAt: at, active: true, schemaVersion: SCHEMA_VERSION };
+  return { supplier, event: createEvent("SupplierCreated", supplier.id, { name }, input.actorId, at) };
+}
+
+export function updateParty(existing, input, kind, at = nowISO()) {
+  if (!existing?.id) throw new Error("Existing contact is required");
+  const name = String(required(input.name, "Name")).trim();
+  if (!["customer", "supplier"].includes(kind)) throw new Error("Unknown contact type");
+  const record = { ...clone(existing), name, phone: String(input.phone ?? "").trim(), address: String(input.address ?? "").trim(), notes: String(input.notes ?? "").trim(), updatedAt: at, version: (existing.version ?? 1) + 1 };
+  if (kind === "supplier") record.taxId = String(input.taxId ?? "").trim();
+  return { record, event: createEvent(kind === "supplier" ? "SupplierUpdated" : "CustomerUpdated", existing.id, { name }, input.actorId, at) };
+}
+
+export function createPurchase(supplier, input, at = nowISO()) {
+  if (!supplier?.id) throw new Error("Supplier is required");
+  const material = String(required(input.material, "Material")).trim();
+  const quantity = nonNegative(input.quantity, "Quantity");
+  if (quantity <= 0) throw new Error("Quantity must be greater than zero");
+  const total = nonNegative(input.total, "Purchase total");
+  if (total <= 0) throw new Error("Purchase total must be greater than zero");
+  const paid = nonNegative(input.paid ?? 0, "Paid amount");
+  if (paid > total) throw new Error("Paid amount cannot exceed purchase total");
+  const purchase = { id: id("PUR"), supplierId: supplier.id, supplierName: supplier.name, invoiceNumber: String(input.invoiceNumber ?? "").trim(), material, thicknessMm: input.thicknessMm == null || input.thicknessMm === "" ? null : nonNegative(input.thicknessMm, "Thickness"), dimensionsMm: String(input.dimensionsMm ?? ""), quantity, unit: input.unit ?? "sheet", total, paid, balance: total - paid, purchasedAt: at, status: paid === total ? "paid" : paid > 0 ? "partial" : "unpaid", schemaVersion: SCHEMA_VERSION };
+  const updatedSupplier = { ...supplier, openBalance: nonNegative(supplier.openBalance ?? 0, "Supplier balance") + purchase.balance, updatedAt: at, version: (supplier.version ?? 1) + 1 };
+  return { purchase, supplier: updatedSupplier, event: createEvent("PurchaseRecorded", supplier.id, { purchaseId: purchase.id, total, paid, balance: purchase.balance, material, quantity }, input.actorId, at) };
+}
+
+export function recordSupplierPayment(supplier, input, at = nowISO()) {
+  const amount = nonNegative(input.amount, "Payment amount");
+  const outstanding = nonNegative(supplier?.openBalance ?? 0, "Supplier balance");
+  if (amount <= 0) throw new Error("Payment must be greater than zero");
+  if (amount > outstanding) throw new Error("Payment exceeds supplier balance");
+  const payment = { id: id("SUPPAY"), kind: "supplier_payment", supplierId: supplier.id, supplierName: supplier.name, amount, method: input.method ?? "cash", reference: String(input.reference ?? ""), paidAt: at, schemaVersion: SCHEMA_VERSION };
+  const updatedSupplier = { ...supplier, openBalance: outstanding - amount, updatedAt: at, version: (supplier.version ?? 1) + 1 };
+  return { payment, supplier: updatedSupplier, event: createEvent("SupplierPaymentRecorded", supplier.id, { paymentId: payment.id, amount }, input.actorId, at) };
+}
+
 export function createJob(input, at = nowISO()) {
   required(input.customerName, "Customer");
   const items = (input.items?.length ? input.items : [input]).map((item, index) => ({
