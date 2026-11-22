@@ -118,3 +118,16 @@ test("production issue consumes only matching approved stock and records traceab
   assert.equal(remnant.sourceJobId, job.id);
   assert.equal(remnant.sourceLotId, moved.destinationLot.id);
 });
+
+test("reusable remnants can be issued to matching jobs and become used at zero", async () => {
+ const { createJob, recordRemnant, issueRemnantToJob } = await import("../www/core.js");
+ const { job } = createJob({ customerName: "Customer", items: [{ material: "Inox 304", thicknessMm: 1 }] });
+ const remnant = recordRemnant({ material: "Inox 304", thicknessMm: 1, widthMm: 300, lengthMm: 500, quantity: 2 });
+ const first = issueRemnantToJob(job, job.items[0].id, remnant, { quantity: 1 });
+ assert.equal(first.remnant.quantity, 1);
+ assert.equal(first.remnant.status, "available");
+ const second = issueRemnantToJob(first.job, job.items[0].id, first.remnant, { quantity: 1 });
+ assert.equal(second.remnant.quantity, 0);
+ assert.equal(second.remnant.status, "used");
+ assert.throws(() => issueRemnantToJob(job, job.items[0].id, remnant, { quantity: 3 }), /exceeds/);
+});
