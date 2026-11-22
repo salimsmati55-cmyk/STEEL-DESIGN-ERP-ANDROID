@@ -215,6 +215,24 @@ export function issueStockToJob(job, itemId, lot, input, at = nowISO()) {
   return { job: next, lot: updatedLot, movement, event: createEvent("MaterialIssuedToJob", job.id, { itemId, issueId: issue.id, lotId: lot.id, quantity, material: lot.material }, input.actorId, at) };
 }
 
+
+export function issueRemnantToJob(job, itemId, remnant, input, at = nowISO()) {
+  if (!job?.id || !remnant?.id) throw new Error("Job and remnant are required");
+  if (remnant.status !== "available" || Number(remnant.quantity) <= 0) throw new Error("Remnant is not available");
+  const quantity = nonNegative(input.quantity ?? 1, "Remnant quantity");
+  if (quantity <= 0 || quantity > remnant.quantity) throw new Error("Remnant quantity exceeds available pieces");
+  const next = clone(job), item = next.items.find(x => x.id === itemId);
+  if (!item) throw new Error("Job item not found");
+  if (String(item.material).trim().toLowerCase() !== String(remnant.material).trim().toLowerCase()) throw new Error("Remnant material does not match job item");
+  if (item.thicknessMm != null && Number(item.thicknessMm) !== Number(remnant.thicknessMm)) throw new Error("Remnant thickness does not match job item");
+  const issue = { id: id("ISS"), remnantId: remnant.id, material: remnant.material, thicknessMm: remnant.thicknessMm, quantity, unit: "piece", issuedAt: at, source: "remnant", operationCode: input.operationCode ?? null };
+  item.materialIssues = [...(item.materialIssues ?? []), issue];
+  next.version = (next.version ?? 1) + 1;
+  const updatedRemnant = { ...remnant, quantity: remnant.quantity - quantity, status: remnant.quantity - quantity === 0 ? "used" : "available", updatedAt: at, version: (remnant.version ?? 0) + 1 };
+  const movement = { id: id("MOV"), kind: "remnant_issue", remnantId: remnant.id, jobId: job.id, itemId, issueId: issue.id, quantity, unit: "piece", material: remnant.material, at, schemaVersion: SCHEMA_VERSION };
+  return { job: next, remnant: updatedRemnant, movement, event: createEvent("RemnantIssuedToJob", job.id, { itemId, remnantId: remnant.id, quantity }, input.actorId, at) };
+}
+
 export function recordRemnant(input, at = nowISO()) {
   required(input.material, "Material");
   const width = nonNegative(input.widthMm, "Remnant width");
