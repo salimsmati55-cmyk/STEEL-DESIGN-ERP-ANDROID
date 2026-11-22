@@ -10,3 +10,12 @@ test("V9 browser entry is connected to the repository-backed application", async
   assert.match(app, /from "\.\/repository\.js"/);
   assert.match(app, /WorkshopRepository\.open\(/);
 });
+
+test("V9 UI provides separate customer receipt and payment workflows", async () => {
+  const app = await readFile(new URL("../www/app-v9.js", import.meta.url), "utf8");
+  assert.match(app, /Core\.createCustomerReceipt/);
+  assert.match(app, /Core\.recordPayment/);
+  assert.match(app, /id="bonClient"/);
+  assert.match(app, /function paymentForm/);
+  assert.match(app, /state\.estimates/);
+});
