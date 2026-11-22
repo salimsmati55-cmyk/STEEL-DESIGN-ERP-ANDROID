@@ -19,3 +19,9 @@ test("V9 UI provides separate customer receipt and payment workflows", async () 
   assert.match(app, /function paymentForm/);
   assert.match(app, /state\.estimates/);
 });
+
+test("customer receipt can be printed independently from manufacturing order", async () => {
+  const app = await readFile(new URL("../www/app-v9.js", import.meta.url), "utf8");
+  assert.match(app, /function printBon/);
+  assert.match(app, /id="printBon"/);
+});
