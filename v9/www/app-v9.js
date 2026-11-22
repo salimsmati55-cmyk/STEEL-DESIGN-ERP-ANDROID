@@ -79,8 +79,8 @@ function purchaseForm(){
  const f=new FormData(e.target),supplier=state.suppliers.find(s=>s.id===f.get("supplierId"));
  const r=Core.createPurchase(supplier,{material:f.get("material"),invoiceNumber:f.get("invoice"),thicknessMm:f.get("thickness")||null,dimensionsMm:f.get("dimensions"),quantity:Number(f.get("quantity")),unit:f.get("unit"),total:Number(f.get("total")),paid:Number(f.get("paid")||0)});
  const stock=Core.receiveStock({supplierId:supplier.id,supplierName:supplier.name,material:r.purchase.material,thicknessMm:r.purchase.thicknessMm,dimensionsMm:r.purchase.dimensionsMm,quantity:r.purchase.quantity,unit:r.purchase.unit,zone:"A"});
- await repo.commitCommand({writes:[{store:"purchases",record:r.purchase},{store:"suppliers",record:r.supplier},{store:"stockLots",record:stock.lot}],event:Core.createEvent("PurchaseStockReceived",r.purchase.id,{supplierId:supplier.id,receiptNumber:stock.lot.receiptNumber,quantity:stock.lot.quantity})});
- await repo.commitCommand({event:r.event});$("#modal").classList.remove("open");await refresh();suppliersPage();
+ r.event.type="PurchaseAndStockReceived";r.event.payload.receiptNumber=stock.lot.receiptNumber;
+ await repo.commitCommand({writes:[{store:"purchases",record:r.purchase},{store:"suppliers",record:r.supplier},{store:"stockLots",record:stock.lot}],event:r.event});$("#modal").classList.remove("open");await refresh();suppliersPage();
  }catch(err){alert(err.message);}};
 }
 function supplierPaymentForm(supplier){
