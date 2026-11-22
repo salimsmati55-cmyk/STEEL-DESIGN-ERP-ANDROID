@@ -31,3 +31,14 @@ Open `v9/www/index.html` from this branch through GitHub Pages or a local HTTP s
 ## Safety
 
 This is a development prototype. Do not use it as the sole record system for real customer jobs. Continue to preserve V7.11 and V8 backups. The migration path will be designed and tested separately before any legacy data is imported.
+
+## V9 engineering foundation added
+
+- `www/core.js`: domain rules for job creation, operation state transitions, price-free OF generation, customer receipts, payment validation, REC stock receipt, lot transfers, remnants, dashboard metrics and migration snapshot validation.
+- `www/repository.js`: separate IndexedDB stores for the main business domains, atomic multi-store commands, audit event persistence, versioned snapshots and isolated staging imports.
+- `tests/domain.test.mjs`: automated domain invariant tests.
+- `package.json` and `.github/workflows/v9-domain-tests.yml`: Node 22 test runner and CI workflow.
+
+Run the domain suite from the `v9` directory with `npm test`.
+
+The new repository is the intended V9 persistence foundation. The initial clickable UI remains a prototype and has not yet been migrated to this repository; do not treat its demo storage as the final multi-device database.
