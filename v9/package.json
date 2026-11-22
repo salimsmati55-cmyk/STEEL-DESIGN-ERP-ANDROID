@@ -1,0 +1,9 @@
+{
+  "name": "steel-design-erp-v9",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test v9/tests/*.test.mjs"
+  },
+  "description": "Next-generation job-centric workshop ERP domain core"
+}
