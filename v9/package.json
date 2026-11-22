@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test v9/tests/*.test.mjs"
+    "test": "node --check www/app-v9.js && node --check www/core.js && node --check www/repository.js && node --test tests/*.test.mjs"
   },
   "description": "Next-generation job-centric workshop ERP domain core"
 }
