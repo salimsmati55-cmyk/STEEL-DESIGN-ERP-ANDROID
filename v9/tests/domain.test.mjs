@@ -101,3 +101,20 @@ test("purchases update supplier debt and supplier payments cannot exceed it", as
   assert.throws(() => recordSupplierPayment(paid.supplier, { amount: 7501 }), /exceeds/);
   assert.throws(() => createPurchase(supplier, { material: "Sheet", quantity: 1, total: 100, paid: 101 }), /cannot exceed/);
 });
+
+test("production issue consumes only matching approved stock and records traceability", async () => {
+  const { createJob, receiveStock, moveStock, issueStockToJob, recordRemnant } = await import("../www/core.js");
+  const { job } = createJob({ customerName: "Customer", items: [{ description: "Bracket", material: "Inox 304", thicknessMm: 1, operations: ["laser"] }] });
+  const received = receiveStock({ material: "Inox 304", thicknessMm: 1, quantity: 5, unit: "sheet", zone: "A" });
+  const moved = moveStock(received.lot, { toZone: "B", quantity: 5 });
+  const issued = issueStockToJob(job, job.items[0].id, moved.destinationLot, { quantity: 2, operationCode: "laser" });
+  assert.equal(issued.lot.remainingQuantity, 3);
+  assert.equal(issued.job.items[0].materialIssues[0].quantity, 2);
+  assert.equal(issued.movement.kind, "material_issue");
+  assert.equal(issued.movement.jobId, job.id);
+  assert.throws(() => issueStockToJob(job, job.items[0].id, received.lot, { quantity: 1 }), /zone B/);
+  assert.throws(() => issueStockToJob(job, job.items[0].id, moved.destinationLot, { quantity: 6 }), /exceeds/);
+  const remnant = recordRemnant({ material: "Inox 304", thicknessMm: 1, widthMm: 350, lengthMm: 700, sourceJobId: job.id, sourceLotId: moved.destinationLot.id, zone: "B" });
+  assert.equal(remnant.sourceJobId, job.id);
+  assert.equal(remnant.sourceLotId, moved.destinationLot.id);
+});
