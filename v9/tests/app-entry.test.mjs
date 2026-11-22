@@ -25,3 +25,15 @@ test("customer receipt can be printed independently from manufacturing order", a
   assert.match(app, /function printBon/);
   assert.match(app, /id="printBon"/);
 });
+
+test("V9 exposes customer, supplier, purchasing and supplier settlement workflows", async () => {
+  const html = await readFile(new URL("../www/index.html", import.meta.url), "utf8");
+  const app = await readFile(new URL("../www/app-v9.js", import.meta.url), "utf8");
+  assert.match(html, /data-view="customers"/);
+  assert.match(html, /data-view="suppliers"/);
+  assert.match(app, /Core\.createCustomer/);
+  assert.match(app, /Core\.createSupplier/);
+  assert.match(app, /Core\.createPurchase/);
+  assert.match(app, /Core\.recordSupplierPayment/);
+  assert.match(app, /store:"stockLots"/);
+});
