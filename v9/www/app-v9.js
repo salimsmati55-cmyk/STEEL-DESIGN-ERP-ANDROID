@@ -8,7 +8,7 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const labels={laser:"قص ليزر",shear:"قص مقص",bending:"ثني",assembly:"تجميع",finishing:"تشطيب",custom:"خدمة خاصة"};
 const opNames=["laser","shear","bending","assembly","finishing"];
 function head(title,sub,actions=""){return '<div class="pagehead"><div><h1>'+title+'</h1><div class="muted">'+sub+'</div></div><div class="toolbar">'+actions+'</div></div>'}
-async function refresh(){[state.jobs,state.lots,state.payments,state.estimates,state.events,state.customers,state.suppliers,state.purchases]=await Promise.all(["jobs","stockLots","payments","estimates","events","customers","suppliers","purchases","remnants"].map(s=>repo.list(s,{limit:5000,direction:"prev"})));}
+async function refresh(){[state.jobs,state.lots,state.payments,state.estimates,state.events,state.customers,state.suppliers,state.purchases,state.remnants]=await Promise.all(["jobs","stockLots","payments","estimates","events","customers","suppliers","purchases","remnants"].map(s=>repo.list(s,{limit:5000,direction:"prev"})));}
 async function log(event){await repo.commitCommand({event});}
 function setView(v){state.view=v;document.querySelectorAll(".nav").forEach(b=>b.classList.toggle("active",b.dataset.view===v));render();}
 document.querySelectorAll(".nav").forEach(b=>b.addEventListener("click",()=>setView(b.dataset.view)));
