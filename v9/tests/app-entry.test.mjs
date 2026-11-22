@@ -45,3 +45,10 @@ test("production job detail includes controlled material issue and remnant flows
  assert.match(app, /store:"stockMovements"/);
  assert.match(app, /store:"remnants"/);
 });
+
+test("V9 displays remnant inventory and supports issuing remnants to production", async () => {
+ const app = await readFile(new URL("../www/app-v9.js", import.meta.url), "utf8");
+ assert.match(app, /Core\.issueRemnantToJob/);
+ assert.match(app, /data-issue-remnant/);
+ assert.match(app, /بقايا الصفائح القابلة للاستعمال/);
+});
