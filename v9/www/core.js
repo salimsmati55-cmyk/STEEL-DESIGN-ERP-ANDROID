@@ -85,8 +85,15 @@ export function createJob(input, at = nowISO()) {
       sequence: sequence + 1,
       state: "queued",
       assignedWorkerId: null,
+      assignedWorkerName: null,
+      priority: op.priority ?? "normal",
+      plannedStartAt: op.plannedStartAt ?? null,
+      dueAt: op.dueAt ?? null,
       startedAt: null,
+      startedBy: null,
       completedAt: null,
+      completedBy: null,
+      history: [],
       note: ""
     }))
   }));
@@ -111,6 +118,28 @@ export function createJob(input, at = nowISO()) {
   return { job, event: createEvent("JobCreated", job.id, { itemCount: items.length }, input.actorId, at) };
 }
 
+export function scheduleOperation(job, itemId, operationId, input = {}, actorId = "manager", at = nowISO()) {
+  if (!job?.id) throw new Error("Job is required");
+  const next = clone(job);
+  const item = next.items.find(x => x.id === itemId);
+  if (!item) throw new Error("Item not found");
+  const op = item.operations.find(x => x.id === operationId);
+  if (!op) throw new Error("Operation not found");
+  const priority = input.priority ?? op.priority ?? "normal";
+  if (!["low", "normal", "high", "urgent"].includes(priority)) throw new Error("Invalid operation priority");
+  const plannedStartAt = input.plannedStartAt === "" ? null : (input.plannedStartAt ?? op.plannedStartAt ?? null);
+  const dueAt = input.dueAt === "" ? null : (input.dueAt ?? op.dueAt ?? null);
+  if (plannedStartAt && dueAt && new Date(dueAt) < new Date(plannedStartAt)) throw new Error("Operation due date cannot be before planned start");
+  op.assignedWorkerId = input.assignedWorkerId || null;
+  op.assignedWorkerName = input.assignedWorkerName || null;
+  op.priority = priority;
+  op.plannedStartAt = plannedStartAt;
+  op.dueAt = dueAt;
+  op.updatedAt = at;
+  next.version = (next.version ?? 1) + 1;
+  return { job: next, event: createEvent("OperationScheduled", job.id, { itemId, operationId, assignedWorkerId: op.assignedWorkerId, priority, plannedStartAt, dueAt }, actorId, at) };
+}
+
 export function transitionOperation(job, itemId, operationId, nextState, actorId = "system", at = nowISO()) {
   if (!OPERATION_STATES.includes(nextState)) throw new Error("Unknown operation state");
   const next = clone(job);
@@ -121,8 +150,9 @@ export function transitionOperation(job, itemId, operationId, nextState, actorId
   const allowed = { queued: ["in_progress", "blocked"], in_progress: ["completed", "blocked", "queued"], blocked: ["queued", "in_progress"], completed: [] };
   if (!allowed[op.state].includes(nextState)) throw new Error(`Invalid transition: ${op.state} → ${nextState}`);
   op.state = nextState;
-  if (nextState === "in_progress") op.startedAt = at;
-  if (nextState === "completed") op.completedAt = at;
+  op.history = [...(op.history ?? []), { state: nextState, actorId, at }];
+  if (nextState === "in_progress") { op.startedAt = at; op.startedBy = actorId; }
+  if (nextState === "completed") { op.completedAt = at; op.completedBy = actorId; }
   next.version += 1;
   const all = next.items.flatMap(x => x.operations);
   next.status = all.length && all.every(x => x.state === "completed") ? "ready_for_delivery" :
