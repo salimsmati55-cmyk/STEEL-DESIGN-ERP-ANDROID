@@ -52,3 +52,12 @@ test("V9 displays remnant inventory and supports issuing remnants to production"
  assert.match(app, /data-issue-remnant/);
  assert.match(app, /بقايا الصفائح القابلة للاستعمال/);
 });
+
+test("production dispatch includes worker assignment, scheduling and delay monitoring", async () => {
+ const app=await readFile(new URL("../www/app-v9.js",import.meta.url),"utf8");
+ assert.match(app,/function scheduleForm/);
+ assert.ok(app.includes("Core.scheduleOperation"));
+ assert.match(app,/function workerForm/);
+ assert.match(app,/state\.employees/);
+ assert.match(app,/عمليات متأخرة/);
+});
