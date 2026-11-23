@@ -5,5 +5,5 @@
   "scripts": {
     "test": "node --check www/app-v9.js && node --check www/core.js && node --check www/repository.js && node --test tests/*.test.mjs"
   },
-  "description": "Next-generation job-centric workshop ERP domain core"
+  "description": "STEEL DESIGN ERP V9 local-first workshop ERP"
 }
