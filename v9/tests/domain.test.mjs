@@ -131,3 +131,26 @@ test("reusable remnants can be issued to matching jobs and become used at zero",
  assert.equal(second.remnant.status, "used");
  assert.throws(() => issueRemnantToJob(job, job.items[0].id, remnant, { quantity: 3 }), /exceeds/);
 });
+
+test("operation scheduling assigns worker, priority and valid dates", async () => {
+ const { scheduleOperation, createJob } = await import("../www/core.js");
+ const { job } = createJob({ customerName: "Client", operations: ["laser"] });
+ const item=job.items[0], op=item.operations[0];
+ const scheduled=scheduleOperation(job,item.id,op.id,{assignedWorkerId:"WRK-1",assignedWorkerName:"Worker A",priority:"urgent",plannedStartAt:"2026-11-23",dueAt:"2026-11-24"});
+ const saved=scheduled.job.items[0].operations[0];
+ assert.equal(saved.assignedWorkerName,"Worker A");
+ assert.equal(saved.priority,"urgent");
+ assert.equal(scheduled.event.type,"OperationScheduled");
+ assert.throws(()=>scheduleOperation(job,item.id,op.id,{plannedStartAt:"2026-11-25",dueAt:"2026-11-24"}),/before planned start/);
+ assert.throws(()=>scheduleOperation(job,item.id,op.id,{priority:"critical"}),/Invalid operation priority/);
+});
+test("operation transition audit records who started and completed work", async () => {
+ const { createJob, transitionOperation }=await import("../www/core.js");
+ const { job }=createJob({customerName:"Client",operations:["bending"]});
+ const item=job.items[0],op=item.operations[0];
+ const started=transitionOperation(job,item.id,op.id,"in_progress","WRK-2","2026-11-23T08:00:00.000Z");
+ assert.equal(started.job.items[0].operations[0].startedBy,"WRK-2");
+ const completed=transitionOperation(started.job,item.id,op.id,"completed","WRK-2","2026-11-23T09:00:00.000Z");
+ assert.equal(completed.job.items[0].operations[0].completedBy,"WRK-2");
+ assert.equal(completed.job.items[0].operations[0].history.length,2);
+});
