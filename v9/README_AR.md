@@ -42,3 +42,11 @@ This is a development prototype. Do not use it as the sole record system for rea
 Run the domain suite from the `v9` directory with `npm test`.
 
 The new repository is the intended V9 persistence foundation. The initial clickable UI remains a prototype and has not yet been migrated to this repository; do not treat its demo storage as the final multi-device database.
+
+
+## Production scheduling and worker accountability
+
+- Each operation can be assigned to a workshop worker, prioritized (low/normal/high/urgent), and given planned start and due dates.
+- The dispatch board groups queued, in-progress, blocked and completed operations, and highlights overdue work.
+- Starting and completing an operation records the responsible worker ID and timestamp in the operation history and emits an audit event.
+- Scheduling changes are persisted atomically with the corresponding event in the V9 repository.
