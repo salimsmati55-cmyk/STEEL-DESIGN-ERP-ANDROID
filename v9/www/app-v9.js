@@ -2,13 +2,13 @@ import * as Core from "./core.js";
 import { WorkshopRepository } from "./repository.js";
 
 const $=s=>document.querySelector(s), app=$("#app");
-let repo, state={view:"home",jobs:[],lots:[],payments:[],estimates:[],events:[],customers:[],suppliers:[],purchases:[],remnants:[]};
+let repo, state={view:"home",jobs:[],lots:[],payments:[],estimates:[],events:[],customers:[],suppliers:[],purchases:[],remnants:[],employees:[]};
 const money=n=>Number(n||0).toLocaleString("fr-FR")+" دج";
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const labels={laser:"قص ليزر",shear:"قص مقص",bending:"ثني",assembly:"تجميع",finishing:"تشطيب",custom:"خدمة خاصة"};
 const opNames=["laser","shear","bending","assembly","finishing"];
 function head(title,sub,actions=""){return '<div class="pagehead"><div><h1>'+title+'</h1><div class="muted">'+sub+'</div></div><div class="toolbar">'+actions+'</div></div>'}
-async function refresh(){[state.jobs,state.lots,state.payments,state.estimates,state.events,state.customers,state.suppliers,state.purchases,state.remnants]=await Promise.all(["jobs","stockLots","payments","estimates","events","customers","suppliers","purchases","remnants"].map(s=>repo.list(s,{limit:5000,direction:"prev"})));}
+async function refresh(){[state.jobs,state.lots,state.payments,state.estimates,state.events,state.customers,state.suppliers,state.purchases,state.remnants,state.employees]=await Promise.all(["jobs","stockLots","payments","estimates","events","customers","suppliers","purchases","remnants","employees"].map(s=>repo.list(s,{limit:5000,direction:"prev"})));}
 async function log(event){await repo.commitCommand({event});}
 function setView(v){state.view=v;document.querySelectorAll(".nav").forEach(b=>b.classList.toggle("active",b.dataset.view===v));render();}
 document.querySelectorAll(".nav").forEach(b=>b.addEventListener("click",()=>setView(b.dataset.view)));
@@ -55,8 +55,28 @@ function issueMaterialForm(jobId,itemId){
 }
 
 function printOF(j){const w=window.open("","_blank");if(!w)return alert("اسمح بفتح نافذة الطباعة");w.document.write('<html lang="ar" dir="rtl"><meta charset="utf-8"><title>OF</title><style>body{font-family:Tahoma;padding:24px}table{width:100%;border-collapse:collapse}td,th{border:1px solid #aaa;padding:8px;text-align:right}</style><h1>STEEL DESIGN · أمر تصنيع OF</h1><p>المرجع: '+esc(j.id)+' · الزبون: '+esc(j.customerName)+'</p>'+j.items.map(i=>'<h3>'+esc(i.description)+'</h3><p>'+esc(i.material)+' · '+esc(i.thicknessMm??"")+' mm · '+esc(i.dimensionsMm)+' · الكمية '+i.quantity+'</p><p>'+i.operations.map(o=>esc(labels[o.code]||o.code)).join(" ← ")+'</p>').join("")+'<p>'+esc(j.notes)+'</p><script>window.onload=()=>window.print()<\/script></html>');w.document.close();}
-function dispatch(){const all=state.jobs.flatMap(j=>j.items.flatMap(i=>i.operations.map(o=>({...o,job:j,item:i}))));app.innerHTML=head("لوحة الإنتاج","تابع العمليات حسب الحالة")+'<div class="board">'+["queued","in_progress","blocked","completed"].map(st=>'<section class="lane"><h3>'+({queued:"في الانتظار",in_progress:"قيد التنفيذ",blocked:"متوقفة",completed:"مكتملة"}[st])+'</h3>'+all.filter(o=>o.state===st).map(o=>'<div class="jobcard"><b>'+esc(o.job.customerName)+'</b><p>'+esc(o.item.description)+' · '+esc(labels[o.code]||o.code)+'</p><button class="btn small" data-job="'+esc(o.job.id)+'">فتح الملف</button></div>').join("")+'</section>').join("")+'</div>';bindJobs();}
-
+function dispatch(){
+ const all=state.jobs.flatMap(j=>j.items.flatMap(i=>i.operations.map(o=>({...o,job:j,item:i}))));
+ const today=new Date().toISOString().slice(0,10);
+ const late=all.filter(o=>o.state!=="completed"&&o.dueAt&&o.dueAt.slice(0,10)<today);
+ const lanes=["queued","in_progress","blocked","completed"];
+ app.innerHTML=head("لوحة الإنتاج","جدولة العمليات، تعيين العمال، ومراقبة التأخير",'<button class="btn" id="addWorker">+ إضافة عامل</button>')+
+ '<section class="stats"><div class="card"><div class="stat-label">في الانتظار</div><div class="stat-value">'+all.filter(o=>o.state==="queued").length+'</div></div><div class="card"><div class="stat-label">قيد التنفيذ</div><div class="stat-value">'+all.filter(o=>o.state==="in_progress").length+'</div></div><div class="card"><div class="stat-label">متأخرة</div><div class="stat-value">'+late.length+'</div></div><div class="card"><div class="stat-label">مكتملة</div><div class="stat-value">'+all.filter(o=>o.state==="completed").length+'</div></div></section>'+
+ (late.length?'<section class="panel"><h2>عمليات متأخرة</h2>'+late.map(o=>'<p>'+esc(o.job.id)+' · '+esc(o.item.description)+' · '+esc(labels[o.code]||o.code)+' · '+esc(o.dueAt)+'</p>').join("")+'</section>':'')+
+ '<div class="board">'+lanes.map(st=>'<section class="lane"><h3>'+({queued:"في الانتظار",in_progress:"قيد التنفيذ",blocked:"متوقفة",completed:"مكتملة"}[st])+'</h3>'+all.filter(o=>o.state===st).map(o=>'<div class="jobcard"><b>'+esc(o.job.customerName)+' · '+esc(o.job.id)+'</b><p>'+esc(o.item.description)+' · '+esc(labels[o.code]||o.code)+'</p><p>العامل: '+esc(o.assignedWorkerName||"غير معيّن")+' · الأولوية: '+esc(({low:"منخفضة",normal:"عادية",high:"مرتفعة",urgent:"عاجلة"}[o.priority]||"عادية"))+'</p><p>البدء: '+esc(o.plannedStartAt||"—")+' · الاستحقاق: '+esc(o.dueAt||"—")+'</p><div class="toolbar"><button class="btn small" data-schedule="'+o.job.id+'|'+o.item.id+'|'+o.id+'">جدولة / تعيين</button><button class="btn small soft" data-job="'+esc(o.job.id)+'">فتح الملف</button></div></div>').join("")+'</section>').join("")+'</div>';
+ $("#addWorker").onclick=workerForm;bindJobs();
+ document.querySelectorAll("[data-schedule]").forEach(b=>b.onclick=()=>scheduleForm(b.dataset.schedule));
+}
+function workerForm(){
+ modal("إضافة عامل للورشة",'<form id="workerForm"><div class="field"><label>اسم العامل *</label><input name="name" required></div><div class="field" style="margin-top:10px"><label>الهاتف (اختياري)</label><input name="phone"></div><button class="btn primary" style="margin-top:14px">حفظ العامل</button></form>');
+ $("#workerForm").onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target),name=String(f.get("name")).trim(),worker={id:"WRK-"+Date.now().toString(36),name,phone:String(f.get("phone")||""),active:true,createdAt:new Date().toISOString()};await repo.commitCommand({writes:[{store:"employees",record:worker}],event:Core.createEvent("WorkerCreated",worker.id,{name})});$("#modal").classList.remove("open");await refresh();dispatch();};
+}
+function scheduleForm(key){
+ const [jobId,itemId,opId]=key.split("|"),job=state.jobs.find(x=>x.id===jobId),item=job?.items.find(x=>x.id===itemId),op=item?.operations.find(x=>x.id===opId);if(!op)return;
+ const opts=state.employees.filter(x=>x.active!==false).map(w=>'<option value="'+esc(w.id)+'" '+(w.id===op.assignedWorkerId?"selected":"")+' >'+esc(w.name)+'</option>').join("");
+ modal("جدولة العملية وتعيين العامل",'<form id="scheduleForm"><div class="field"><label>العامل المسؤول</label><select name="worker"><option value="">غير معيّن</option>'+opts+'</select></div><div class="formgrid" style="margin-top:10px"><div class="field"><label>الأولوية</label><select name="priority">'+["low","normal","high","urgent"].map(x=>'<option value="'+x+'" '+((op.priority||"normal")===x?"selected":"")+' >'+({low:"منخفضة",normal:"عادية",high:"مرتفعة",urgent:"عاجلة"}[x])+'</option>').join("")+'</select></div><div class="field"><label>تاريخ البدء المخطط</label><input name="start" type="date" value="'+esc(op.plannedStartAt||"")+'"></div><div class="field"><label>تاريخ استحقاق العملية</label><input name="due" type="date" value="'+esc(op.dueAt||job.dueAt||"")+'"></div></div><p class="muted">العامل الذي يبدأ أو ينهي العملية يُسجّل تلقائياً في سجلها.</p><button class="btn primary" style="margin-top:14px">حفظ الجدولة</button></form>');
+ $("#scheduleForm").onsubmit=async e=>{e.preventDefault();try{const f=new FormData(e.target),worker=state.employees.find(w=>w.id===f.get("worker")),fresh=await repo.get("jobs",jobId),r=Core.scheduleOperation(fresh,itemId,opId,{assignedWorkerId:worker?.id||null,assignedWorkerName:worker?.name||null,priority:f.get("priority"),plannedStartAt:f.get("start")||null,dueAt:f.get("due")||null});await repo.commitCommand({writes:[{store:"jobs",record:r.job}],event:r.event});$("#modal").classList.remove("open");await refresh();dispatch();}catch(err){alert(err.message);}};
+}
 function stockPage(){
  const available=state.remnants.filter(x=>x.status==="available"&&Number(x.quantity)>0);
  app.innerHTML=head("المخزون و REC","استلام المواد في A، الجاهز للإنتاج B، والمنتج النهائي C",'<button class="btn primary" id="newRec">+ REC استلام خام</button>')+
