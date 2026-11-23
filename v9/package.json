@@ -1,9 +1,19 @@
 {
-  "name": "steel-design-erp-v9",
+  "name": "steel-design-erp-v9-android",
+  "version": "9.0.0",
   "private": true,
   "type": "module",
+  "description": "STEEL DESIGN ERP V9 Android application",
   "scripts": {
-    "test": "node --check www/app-v9.js && node --check www/core.js && node --check www/repository.js && node --test tests/*.test.mjs"
+    "test": "node --check www/app-v9.js && node --check www/core.js && node --check www/repository.js && node --test tests/*.test.mjs",
+    "android:sync": "cap sync android",
+    "android:open": "cap open android"
   },
-  "description": "STEEL DESIGN ERP V9 local-first workshop ERP"
+  "dependencies": {
+    "@capacitor/android": "8.6.2",
+    "@capacitor/core": "8.6.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.6.2"
+  }
 }
