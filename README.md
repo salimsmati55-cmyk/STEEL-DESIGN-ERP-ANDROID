@@ -1,12 +1,22 @@
-# STEEL DESIGN ERP — Android
+# STEEL DESIGN ERP — Web & Android
 
-تطوير V8 يتم على الفرع المستقل [v8-real-app](https://github.com/salimsmati55-cmyk/STEEL-DESIGN-ERP-ANDROID/tree/v8-real-app)، مع عدم تعديل main.
+تطوير التطبيق مستمر على فروع مستقلة للحفاظ على النسخ السابقة وبيانات الورشة.
 
-## تطبيق V8 الحالي
-- [واجهة التطبيق V8](v8/www/index.html)
-- [ملخص المرحلة التشغيلية](docs/V8_OPERATIONAL_MVP_STAGE2.md)
-- [أساس التخزين المحلي](docs/V8_STORAGE_FOUNDATION_STAGE1.md)
-- [خط بناء Android APK](.github/workflows/android-apk.yml)
+## الفروع
+- [V8 الأساسي](https://github.com/salimsmati55-cmyk/STEEL-DESIGN-ERP-ANDROID/tree/v8-real-app): منطق التشغيل والتخزين المحلي.
+- [V8.3 واجهة الويب](https://github.com/salimsmati55-cmyk/STEEL-DESIGN-ERP-ANDROID/tree/v8.3-web-settings-ui): واجهة داكنة مستوحاة من إعدادات Android، متجاوبة للويب والتابلت.
 
-## تنبيه
-تم إعداد مسار البناء ليعمل من فرع V8، لكن لا نعتبر APK جاهزاً أو مختبراً حتى ينجح GitHub Actions وتجربة التطبيق على جهاز Android فعلي. تبقى بيانات V7.11 محفوظة ولا تُحذف أثناء التطوير.
+## واجهة V8.3
+- [صفحة التطبيق](v8/www/index.html)
+- [التنسيقات المتجاوبة](v8/www/styles.css)
+- [بيانات التطبيق](v8/www/manifest.webmanifest)
+
+## أساس التشغيل المحفوظ من V8
+- تطبيق عربي RTL يعمل محلياً مع IndexedDB ومسودة تلقائية.
+- ترحيل محافظ لسجلات V7.11 دون حذف مفاتيح localStorage الأصلية.
+- الطلبات والزبائن والإنتاج وسندات REC والمخزون A/B/C.
+- أمر التصنيع OF منفصل عن بون الزبون BON CLIENT.
+- النسخ الاحتياطي والاستعادة بصيغة JSON.
+
+## تنبيه مهم
+V8.3 حالياً تحديث واجهة الويب فقط على فرع مستقل؛ لم يتم دمجه في v8-real-app أو main، ولم يتم نشر رابط ويب عام أو إنتاج APK من هذا الفرع. لا تمسح بيانات المتصفح أو التطبيق أثناء التطوير. لا تعتبر أي نسخة Android جاهزة قبل نجاح البناء واختبارها على جهاز فعلي.
