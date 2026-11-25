@@ -1,0 +1,53 @@
+name: Deploy STEEL DESIGN ERP V8.3 Web Preview
+
+on:
+  push:
+    branches:
+      - v8.3-web-settings-ui
+    paths:
+      - "v8/www/**"
+      - ".github/workflows/deploy-web-preview.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: steel-design-web-preview
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout V8.3 preview
+        uses: actions/checkout@v4
+
+      - name: Validate PWA application files
+        run: |
+          test -f v8/www/index.html
+          test -f v8/www/app.js
+          test -f v8/www/styles.css
+          test -f v8/www/manifest.webmanifest
+          test -f v8/www/sw.js
+          test -f v8/www/icon.svg
+          node --check v8/www/app.js
+          node --check v8/www/src/storage/indexeddb.js
+          python -m json.tool v8/www/manifest.webmanifest > /dev/null
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload web application
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: v8/www
+
+      - name: Publish web preview
+        id: deployment
+        uses: actions/deploy-pages@v4
