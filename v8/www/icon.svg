@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<rect width="512" height="512" rx="112" fill="#08090c"/>
+<rect x="42" y="42" width="428" height="428" rx="88" fill="#14243a" stroke="#6f9fd8" stroke-width="12"/>
+<path d="M112 154h288v54H112zm0 150h288v54H112z" fill="#d9e9ff"/>
+<path d="M132 225l124 78 124-78" fill="none" stroke="#8ab4f8" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="256" y="425" text-anchor="middle" font-family="Arial,sans-serif" font-size="54" font-weight="700" fill="#f3f4f6">STEEL</text>
+</svg>
