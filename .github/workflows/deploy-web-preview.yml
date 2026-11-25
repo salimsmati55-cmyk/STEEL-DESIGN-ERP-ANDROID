@@ -28,6 +28,18 @@ jobs:
       - name: Checkout V8.3 preview
         uses: actions/checkout@v4
 
+      - name: Validate PWA application files
+        run: |
+          test -f v8/www/index.html
+          test -f v8/www/app.js
+          test -f v8/www/styles.css
+          test -f v8/www/manifest.webmanifest
+          test -f v8/www/sw.js
+          test -f v8/www/icon.svg
+          node --check v8/www/app.js
+          node --check v8/www/src/storage/indexeddb.js
+          python -m json.tool v8/www/manifest.webmanifest > /dev/null
+
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
