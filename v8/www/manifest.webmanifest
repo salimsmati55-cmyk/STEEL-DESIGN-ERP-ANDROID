@@ -1,1 +1,17 @@
-{"name":"STEEL DESIGN ERP V8.3","short_name":"STEEL DESIGN","lang":"ar","dir":"rtl","start_url":"./","display":"standalone","background_color":"#08090c","theme_color":"#08090c"}
+{
+  "id": "./",
+  "name": "STEEL DESIGN ERP",
+  "short_name": "STEEL DESIGN",
+  "description": "إدارة ورشة تصنيع المعادن والطلبات والإنتاج والمخزون",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#08090c",
+  "theme_color": "#08090c",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
