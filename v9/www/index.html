@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f7f9fc"><title>STEEL DESIGN ERP · V9 Next Generation</title>
+<meta name="theme-color" content="#f7f9fc"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><link rel="manifest" href="./manifest.webmanifest"><title>STEEL DESIGN ERP · V9 Next Generation</title>
 <style>
 :root{font-family:Tahoma,"Segoe UI",Arial,sans-serif;color:#182536;background:#f5f7fa;font-synthesis:none;--ink:#182536;--muted:#718096;--line:#e2e8f0;--paper:#fff;--blue:#1d4ed8;--blue2:#eaf1ff;--green:#15803d;--amber:#b45309;--red:#b91c1c}
 *{box-sizing:border-box}body{margin:0;background:#f5f7fa}button,input,select,textarea{font:inherit}button{cursor:pointer}
@@ -22,7 +22,8 @@ main{padding:24px;max-width:1600px;width:100%;margin:auto}.pagehead{display:flex
 @media(max-width:900px){.shell{grid-template-columns:1fr}aside{flex-direction:row;overflow:auto;border-left:0;border-bottom:1px solid var(--line);padding:7px}.nav{white-space:nowrap;padding:9px 11px}main{padding:14px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.board{grid-template-columns:repeat(4,240px)}header{padding:0 12px}}
 @media(max-width:520px){.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}.pagehead{align-items:flex-start;flex-direction:column}.top-actions .status{display:none}.brand b{font-size:12px}}
 @media print{header,aside,.no-print{display:none!important}.shell{display:block}main{padding:0}.dialog{max-height:none}}
-</style></head>
+</style>
+<link rel="stylesheet" href="./mobile.css"></head>
 <body>
 <header><div class="brand"><div class="logo">SD</div><div><b>STEEL DESIGN ERP</b><small>V9 · Next Generation · Job-centric</small></div></div><div class="top-actions"><span class="status" id="dbStatus">قاعدة البيانات المحلية</span><button class="btn" id="backupBtn">تصدير نسخة</button><label class="btn">استعادة<input id="restoreInput" type="file" accept="application/json" hidden></label></div></header>
 <div class="shell"><aside>
