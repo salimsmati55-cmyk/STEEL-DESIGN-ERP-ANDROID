@@ -102,12 +102,18 @@ const detailObserver=new MutationObserver(async()=>{
 detailObserver.observe($("#modalBody"),{childList:true,subtree:true});
 document.addEventListener("click",async event=>{
   const button=event.target.closest("#printOF");if(!button)return;
-  event.preventDefault();event.stopImmediatePropagation();
   const title=$("#modalTitle"),jobId=title?.textContent.replace("ملف العمل ","").trim();
   if(!jobId)return;
   const rows=await readJobAttachments(jobId);
-  if(!rows.length){alert("لا توجد رسومات أو صور مرفقة بهذا الطلب.");return;}
+  if(!rows.length)return;
+  event.preventDefault();event.stopImmediatePropagation();
+  const db=await WorkshopRepository.open();
+  let job;try{job=await db.get("jobs",jobId);}finally{db.close();}
+  if(!job)return;
   const win=window.open("","_blank");if(!win){alert("اسمح بفتح نافذة الطباعة.");return;}
-  win.document.write("<html lang='ar' dir='rtl'><meta charset='utf-8'><title>مرفقات OF</title><style>body{font-family:Tahoma;padding:20px}img{max-width:100%;max-height:75vh;object-fit:contain;display:block;margin:12px auto;border:1px solid #ddd}h2{text-align:center}</style><h2>STEEL DESIGN ERP · مرفقات أمر التصنيع OF</h2>"+rows.map(a=>"<h3>"+(a.type==="sketch"?"الكروكي الهندسي":"صورة النموذج")+"</h3><img src='"+a.dataUrl+"'>").join("")+"<script>window.onload=()=>window.print()<\\/script></html>");
+  const labels={laser:"قص ليزر",shear:"قص مقص",bending:"ثني",assembly:"تجميع",finishing:"تشطيب",custom:"خدمة خاصة"};
+  const items=job.items.map(item=>"<section><h3>"+item.description+"</h3><p>المادة: "+(item.material||"—")+" · السماكة: "+(item.thicknessMm??"—")+" mm · الأبعاد: "+(item.dimensionsMm||"—")+" · الكمية: "+item.quantity+"</p><p>العمليات: "+item.operations.map(op=>labels[op.code]||op.code).join(" ← ")+"</p></section>").join("");
+  const attachments=rows.map(a=>"<h3>"+(a.type==="sketch"?"الكروكي الهندسي":"صورة النموذج")+"</h3><img src='"+a.dataUrl+"'>").join("");
+  win.document.write("<html lang='ar' dir='rtl'><meta charset='utf-8'><title>أمر تصنيع OF</title><style>body{font-family:Tahoma;padding:22px;color:#182536}h1{text-align:center;font-size:22px}section{border:1px solid #ddd;padding:12px;margin:12px 0}img{max-width:100%;max-height:65vh;object-fit:contain;display:block;margin:12px auto;border:1px solid #ddd}p{line-height:1.8}</style><h1>STEEL DESIGN ERP · أمر تصنيع OF</h1><p>المرجع: "+job.id+" · الزبون: "+job.customerName+"</p><p>تاريخ التسليم: "+(job.dueAt||"—")+"</p>"+items+"<p>ملاحظات: "+(job.notes||"—")+"</p><h2>الكروكي وصور النموذج</h2>"+attachments+"<script>window.onload=()=>window.print()<\\/script></html>");
   win.document.close();
 },true);
