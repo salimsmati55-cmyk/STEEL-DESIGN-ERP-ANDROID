@@ -1,0 +1,16 @@
+.kroki-panel{grid-column:1/-1;border:1px solid #dbe4ef;border-radius:12px;padding:12px;background:#fbfdff;min-width:0}
+.kroki-heading{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:9px;font-size:13px}
+.kroki-heading span,.kroki-hint{font-size:10px;color:#718096}
+.kroki-tools{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px}
+.kroki-tools button{border:1px solid #d7e0eb;background:#fff;border-radius:8px;padding:8px 10px;font-size:11px;color:#26374b}
+.kroki-tools button:active{background:#eaf1ff}
+.kroki-canvas-wrap{width:100%;height:180px;overflow:auto;border:1px solid #cbd5e1;border-radius:9px;background:#fff;touch-action:pan-x pan-y}
+.kroki-canvas{display:block;width:100%;height:100%;object-fit:fill;touch-action:none}
+.kroki-hint{margin-top:7px}
+.kroki-photos{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+.kroki-photo{position:relative;width:76px;height:76px;border:1px solid #dbe4ef;border-radius:8px;overflow:hidden}
+.kroki-photo img{width:100%;height:100%;object-fit:cover}
+.kroki-photo button{position:absolute;top:2px;left:2px;border:0;border-radius:50%;width:22px;height:22px;background:#fff;color:#b91c1c}
+.kroki-expanded{position:fixed!important;inset:8px!important;z-index:50!important;background:#fff!important;display:flex;flex-direction:column;box-shadow:0 0 0 999px #0f172a99}
+.kroki-expanded .kroki-canvas-wrap{height:auto;flex:1;min-height:0}
+@media(max-width:700px){.kroki-panel{padding:10px}.kroki-canvas-wrap{height:165px}.kroki-tools button{min-height:38px}.kroki-expanded{inset:5px!important}}
