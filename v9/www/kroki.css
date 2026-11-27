@@ -14,3 +14,8 @@
 .kroki-expanded{position:fixed!important;inset:8px!important;z-index:50!important;background:#fff!important;display:flex;flex-direction:column;box-shadow:0 0 0 999px #0f172a99}
 .kroki-expanded .kroki-canvas-wrap{height:auto;flex:1;min-height:0}
 @media(max-width:700px){.kroki-panel{padding:10px}.kroki-canvas-wrap{height:165px}.kroki-tools button{min-height:38px}.kroki-expanded{inset:5px!important}}
+
+.v9-attachment-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.v9-attachment-grid figure{margin:0;min-width:0}
+.v9-attachment-grid img{width:100%;height:130px;object-fit:contain;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px}
+.v9-attachment-grid figcaption{font-size:11px;color:#64748b;margin-top:4px}
