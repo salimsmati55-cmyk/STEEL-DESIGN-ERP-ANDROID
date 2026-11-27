@@ -81,3 +81,33 @@ const observer=new MutationObserver(()=>{
 });
 observer.observe(document.body,{childList:true,subtree:true});
 
+
+async function readJobAttachments(jobId){
+  const db=await WorkshopRepository.open();
+  try{return await db.list("attachments",{index:"by-owner",query:IDBKeyRange.only(jobId),limit:100});}
+  finally{db.close();}
+}
+const detailObserver=new MutationObserver(async()=>{
+  const title=$("#modalTitle"),body=$("#modalBody");
+  if(!title||!body||!title.textContent.startsWith("ملف العمل "))return;
+  const jobId=title.textContent.replace("ملف العمل ","").trim();
+  if(!jobId||body.querySelector("[data-v9-attachments]"))return;
+  try{
+    const rows=await readJobAttachments(jobId);if(!rows.length)return;
+    const section=document.createElement("section");section.className="panel";section.dataset.v9Attachments="1";
+    section.innerHTML="<h3>الكروكي وصور النموذج</h3><div class='v9-attachment-grid'>"+rows.map(a=>"<figure><img alt='"+(a.type==="sketch"?"الكروكي":"صورة النموذج")+"' src='"+a.dataUrl+"'><figcaption>"+(a.type==="sketch"?"الكروكي":"صورة النموذج")+"</figcaption></figure>").join("")+"</div>";
+    body.append(section);
+  }catch(error){console.warn("V9 attachments preview unavailable",error);}
+});
+detailObserver.observe($("#modalBody"),{childList:true,subtree:true});
+document.addEventListener("click",async event=>{
+  const button=event.target.closest("#printOF");if(!button)return;
+  event.preventDefault();event.stopImmediatePropagation();
+  const title=$("#modalTitle"),jobId=title?.textContent.replace("ملف العمل ","").trim();
+  if(!jobId)return;
+  const rows=await readJobAttachments(jobId);
+  if(!rows.length){alert("لا توجد رسومات أو صور مرفقة بهذا الطلب.");return;}
+  const win=window.open("","_blank");if(!win){alert("اسمح بفتح نافذة الطباعة.");return;}
+  win.document.write("<html lang='ar' dir='rtl'><meta charset='utf-8'><title>مرفقات OF</title><style>body{font-family:Tahoma;padding:20px}img{max-width:100%;max-height:75vh;object-fit:contain;display:block;margin:12px auto;border:1px solid #ddd}h2{text-align:center}</style><h2>STEEL DESIGN ERP · مرفقات أمر التصنيع OF</h2>"+rows.map(a=>"<h3>"+(a.type==="sketch"?"الكروكي الهندسي":"صورة النموذج")+"</h3><img src='"+a.dataUrl+"'>").join("")+"<script>window.onload=()=>window.print()<\\/script></html>");
+  win.document.close();
+},true);
