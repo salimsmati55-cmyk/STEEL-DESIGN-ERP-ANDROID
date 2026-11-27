@@ -23,11 +23,11 @@ main{padding:24px;max-width:1600px;width:100%;margin:auto}.pagehead{display:flex
 @media(max-width:520px){.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}.pagehead{align-items:flex-start;flex-direction:column}.top-actions .status{display:none}.brand b{font-size:12px}}
 @media print{header,aside,.no-print{display:none!important}.shell{display:block}main{padding:0}.dialog{max-height:none}}
 </style>
-<link rel="stylesheet" href="./mobile.css"></head>
+<link rel="stylesheet" href="./mobile.css"><link rel="stylesheet" href="./kroki.css"></head>
 <body>
 <header><div class="brand"><div class="logo">SD</div><div><b>STEEL DESIGN ERP</b><small>V9 · Next Generation · Job-centric</small></div></div><div class="top-actions"><span class="status" id="dbStatus">قاعدة البيانات المحلية</span><button class="btn" id="backupBtn">تصدير نسخة</button><label class="btn">استعادة<input id="restoreInput" type="file" accept="application/json" hidden></label></div></header>
 <div class="shell"><aside>
 <button class="nav active" data-view="home">مركز القيادة</button><button class="nav" data-view="jobs">ملفات العمل</button><button class="nav" data-view="dispatch">لوحة الإنتاج</button><button class="nav" data-view="stock">المخزون و REC</button><button class="nav" data-view="customers">الزبائن</button><button class="nav" data-view="suppliers">الموردون والمشتريات</button><button class="nav" data-view="accounts">الحسابات</button>
 <div style="margin-top:auto;padding:12px;color:#94a3b8;font-size:10px;line-height:1.8">نسخة V9 تجريبية مستقلة.<br>لا تمس بيانات V7.11 أو V8.</div></aside><main id="app"></main></div>
 <div class="modal" id="modal"><div class="dialog"><div class="dialoghead"><h2 id="modalTitle">ملف عمل جديد</h2><button class="btn small" id="closeModal">إغلاق</button></div><div id="modalBody"></div></div></div>
-<script type="module" src="./app-v9.js"></script></body></html>
+<script type="module" src="./app-v9.js"></script><script type="module" src="./kroki-ui.js"></script></body></html>
