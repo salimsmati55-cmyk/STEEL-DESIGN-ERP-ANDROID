@@ -106,11 +106,38 @@ jobs:
           (adaptive / "ic_launcher_round.xml").write_text(xml)
           PY
 
+      - name: Integrate STEEL DESIGN AUDIO SYSTEM
+        working-directory: ${{ steps.app.outputs.dir }}
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import shutil
+          source = Path("$GITHUB_WORKSPACE/assets/steel-design-audio.js")
+          if not source.exists():
+              raise SystemExit("Audio system source file is missing")
+          html_files = [p for p in Path(".").rglob("index.html") if "node_modules" not in p.parts and "android" not in p.parts]
+          if not html_files:
+              raise SystemExit("No application index.html found for audio integration")
+          for html in html_files:
+              asset_dir = html.parent / "assets"
+              asset_dir.mkdir(parents=True, exist_ok=True)
+              shutil.copy2(source, asset_dir / "steel-design-audio.js")
+              text = html.read_text(encoding="utf-8")
+              tag = '<script src="./assets/steel-design-audio.js"></script>'
+              if "steel-design-audio.js" not in text:
+                  if "</body>" in text:
+                      text = text.replace("</body>", tag + "\\n</body>")
+                  else:
+                      text += "\\n" + tag
+                  html.write_text(text, encoding="utf-8")
+              print("Audio integrated:", html)
+          PY
+
       - name: Set Android version
         working-directory: ${{ steps.app.outputs.dir }}/android
         run: |
-          sed -i -E 's/versionCode[[:space:]]+[0-9]+/versionCode 14/' app/build.gradle
-          sed -i -E 's/versionName[[:space:]]+"[^"]+"/versionName "11.3.1"/' app/build.gradle
+          sed -i -E 's/versionCode[[:space:]]+[0-9]+/versionCode 15/' app/build.gradle
+          sed -i -E 's/versionName[[:space:]]+"[^"]+"/versionName "11.4.0"/' app/build.gradle
           grep -nE 'versionCode|versionName' app/build.gradle
 
       - name: Build Android APK
@@ -122,7 +149,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: STEEL-DESIGN-ERP-APK-V11.3-SD-ICON
+          name: STEEL-DESIGN-ERP-APK-V11.4-AUDIO
           path: ${{ steps.app.outputs.dir }}/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
