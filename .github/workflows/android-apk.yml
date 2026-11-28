@@ -136,8 +136,8 @@ jobs:
       - name: Set Android version
         working-directory: ${{ steps.app.outputs.dir }}/android
         run: |
-          sed -i -E 's/versionCode[[:space:]]+[0-9]+/versionCode 15/' app/build.gradle
-          sed -i -E 's/versionName[[:space:]]+"[^"]+"/versionName "11.4.0"/' app/build.gradle
+          sed -i -E 's/versionCode[[:space:]]+[0-9]+/versionCode 16/' app/build.gradle
+          sed -i -E 's/versionName[[:space:]]+"[^"]+"/versionName "11.4.1"/' app/build.gradle
           grep -nE 'versionCode|versionName' app/build.gradle
 
       - name: Build Android APK
@@ -149,7 +149,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: STEEL-DESIGN-ERP-APK-V11.4-AUDIO
+          name: STEEL-DESIGN-ERP-APK-V11.4.1-PRO-AUDIO
           path: ${{ steps.app.outputs.dir }}/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
