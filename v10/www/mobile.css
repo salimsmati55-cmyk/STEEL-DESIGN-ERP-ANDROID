@@ -1,0 +1,44 @@
+/* V9 mobile-first portrait presentation */
+@media(max-width:700px){
+  html,body{min-height:100%;width:100%;overflow-x:hidden}
+  body{padding-bottom:76px}
+  header{height:58px;padding:0 12px;gap:8px}
+  .brand{gap:8px}.logo{width:34px;height:34px;border-radius:10px}
+  .brand b{font-size:12px}.brand small{font-size:9px}
+  .top-actions{gap:5px}.top-actions .btn{padding:7px 9px;font-size:10px}
+  .top-actions #backupBtn,.top-actions label{display:none}
+  .shell{display:block;min-height:calc(100dvh - 58px)}
+  aside{position:fixed;z-index:20;bottom:0;top:auto;left:0;right:0;height:66px;
+    display:flex;flex-direction:row;align-items:center;gap:5px;overflow-x:auto;
+    overflow-y:hidden;padding:6px 8px calc(6px + env(safe-area-inset-bottom));
+    border:0;border-top:1px solid var(--line);box-shadow:0 -5px 18px #172f5210;
+    scrollbar-width:none}
+  aside::-webkit-scrollbar{display:none}
+  .nav{flex:0 0 auto;min-width:66px;text-align:center;padding:9px 10px;font-size:11px}
+  aside>div{display:none}
+  main{padding:13px 12px 22px;max-width:100%;width:100%}
+  .pagehead{display:flex;flex-direction:column;align-items:stretch;gap:10px;margin-bottom:14px}
+  .pagehead h1{font-size:20px}.pagehead .toolbar{width:100%}
+  .pagehead .toolbar .btn{flex:1}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .card,.panel{padding:13px;border-radius:12px}
+  .stat-value{font-size:22px}
+  .panel{margin-top:11px}
+  .formgrid{grid-template-columns:minmax(0,1fr);gap:11px}
+  .field.full{grid-column:auto}
+  .field input,.field select,.field textarea{font-size:16px;min-height:45px}
+  .field textarea{min-height:88px}
+  .toolbar{gap:7px}.toolbar .btn{min-height:42px}
+  .board{grid-template-columns:repeat(4,minmax(235px,1fr));gap:9px}
+  .modal{align-items:flex-end;padding:0}
+  .dialog{width:100%;max-width:none;max-height:94dvh;border-radius:18px 18px 0 0;
+    padding:16px 13px calc(18px + env(safe-area-inset-bottom))}
+  .dialoghead{position:sticky;top:-16px;background:#fff;padding:5px 0 11px;z-index:2}
+  .tablewrap{margin:0 -5px}
+  table{min-width:620px}
+}
+@media(min-width:701px) and (max-width:900px){
+  .shell{grid-template-columns:1fr}
+  aside{flex-direction:row;overflow-x:auto}
+  main{padding:18px}
+}
