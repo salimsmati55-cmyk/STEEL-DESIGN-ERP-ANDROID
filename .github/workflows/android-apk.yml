@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   build-android:
@@ -37,16 +38,43 @@ jobs:
           python -m pip install --upgrade pip
           pip install pillow cairosvg
 
-      - name: Extract V11.2 package
+      - name: Extract Android project shell
         run: |
           mkdir -p project
           unzip -q 'STEEL_DESIGN_ERP_ANDROID_V7_11_BUILD_PACKAGE(3).zip' -d project
+
+      - name: Restore approved V11.3.1 application HTML from reference APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p reference
+          gh run download 46152350660 --repo "${{ github.repository }}" --name "STEEL-DESIGN-ERP-APK-V11.3-SD-ICON" --dir reference
+          APK="$(find reference -name '*.apk' -type f | head -n 1)"
+          test -n "$APK"
+          unzip -p "$APK" assets/public/index.html > reference/index.html
+          test -s reference/index.html
+          echo "Reference HTML size: $(wc -c < reference/index.html) bytes"
+          echo "Reference HTML identity:"
+          grep -o 'V11\\.2[^<]*' reference/index.html | head -1 || true
+          find project -name index.html -type f -not -path '*/node_modules/*' -not -path '*/android/*' -print
+          python - <<'PY'
+          from pathlib import Path
+          source = Path("reference/index.html")
+          targets = [p for p in Path("project").rglob("index.html")
+                     if "node_modules" not in p.parts and "android" not in p.parts]
+          if not targets:
+              raise SystemExit("No app index.html found in Android project package")
+          data = source.read_bytes()
+          for target in targets:
+              target.write_bytes(data)
+              print("Restored approved app HTML:", target, len(data), "bytes")
+          PY
 
       - name: Locate application
         id: app
         shell: bash
         run: |
-          PACKAGE_FILE="$(find project -name package.json -type f | head -n 1)"
+          PACKAGE_FILE="$(find project -name package.json -type f -not -path '*/node_modules/*' | head -n 1)"
           if [ -z "$PACKAGE_FILE" ]; then
             echo "package.json not found"
             exit 1
@@ -70,10 +98,7 @@ jobs:
           import cairosvg
           from PIL import Image
           import io
-
-          svg = Path("../../assets/steel-design-sd-icon.svg")
-          if not svg.exists():
-              svg = Path("assets/steel-design-sd-icon.svg")
+          svg = Path("${{ github.workspace }}/assets/steel-design-sd-icon.svg")
           if not svg.exists():
               raise SystemExit("SD icon SVG missing from repository")
           png = cairosvg.svg2png(url=str(svg), output_width=512, output_height=512)
@@ -89,7 +114,6 @@ jobs:
           drawable = res / "drawable"
           drawable.mkdir(parents=True, exist_ok=True)
           base.resize((432,432), Image.Resampling.LANCZOS).save(drawable / "ic_launcher_foreground.png", optimize=True)
-          # Remove Capacitor's higher-priority vector foreground so Android resolves our SD PNG instead.
           legacy = Path("android/app/src/main/res/drawable-v24/ic_launcher_foreground.xml")
           if legacy.exists():
               legacy.unlink()
@@ -108,14 +132,17 @@ jobs:
 
       - name: Integrate STEEL DESIGN AUDIO SYSTEM
         working-directory: ${{ steps.app.outputs.dir }}
+        env:
+          GITHUB_WORKSPACE: ${{ github.workspace }}
         run: |
           python - <<'PY'
           from pathlib import Path
-          import shutil, os
-          source = Path(os.environ["GITHUB_WORKSPACE"]) / "assets/steel-design-audio.js"
+          import shutil
+          source = Path(__import__("os").environ["GITHUB_WORKSPACE"]) / "assets/steel-design-audio.js"
           if not source.exists():
               raise SystemExit("Audio system source file is missing")
-          html_files = [p for p in Path(".").rglob("index.html") if "node_modules" not in p.parts and "android" not in p.parts]
+          html_files = [p for p in Path(".").rglob("index.html")
+                        if "node_modules" not in p.parts and "android" not in p.parts]
           if not html_files:
               raise SystemExit("No application index.html found for audio integration")
           for html in html_files:
@@ -126,19 +153,28 @@ jobs:
               tag = '<script src="./assets/steel-design-audio.js"></script>'
               if "steel-design-audio.js" not in text:
                   if "</body>" in text:
-                      text = text.replace("</body>", tag + "\\n</body>")
+                      text = text.replace("</body>", tag + "\n</body>", 1)
                   else:
-                      text += "\\n" + tag
+                      text += "\n" + tag
                   html.write_text(text, encoding="utf-8")
-              print("Audio integrated:", html)
+              if tag not in text:
+                  raise SystemExit(f"Audio script tag missing from {html}")
+              print("Audio integrated:", html, "script bytes:", (asset_dir / "steel-design-audio.js").stat().st_size)
           PY
 
       - name: Set Android version
         working-directory: ${{ steps.app.outputs.dir }}/android
         run: |
-          sed -i -E 's/versionCode[[:space:]]+[0-9]+/versionCode 16/' app/build.gradle
-          sed -i -E 's/versionName[[:space:]]+"[^"]+"/versionName "11.4.1"/' app/build.gradle
+          sed -i -E 's/versionCode[[:space:]]+[0-9]+/versionCode 17/' app/build.gradle
+          sed -i -E 's/versionName[[:space:]]+"[^"]+"/versionName "11.4.2"/' app/build.gradle
           grep -nE 'versionCode|versionName' app/build.gradle
+
+      - name: Verify packaged web assets
+        working-directory: ${{ steps.app.outputs.dir }}
+        run: |
+          test -f www/assets/steel-design-audio.js || test -f dist/assets/steel-design-audio.js
+          grep -R -l 'steel-design-audio.js' --include='index.html' . --exclude-dir=node_modules --exclude-dir=android
+          grep -R -l 'STEEL DESIGN AUDIO' --include='steel-design-audio.js' . --exclude-dir=node_modules
 
       - name: Build Android APK
         working-directory: ${{ steps.app.outputs.dir }}/android
@@ -149,7 +185,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: STEEL-DESIGN-ERP-APK-V11.4.1-PRO-AUDIO
+          name: STEEL-DESIGN-ERP-APK-V11.4.2-REFERENCE-AUDIO
           path: ${{ steps.app.outputs.dir }}/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
