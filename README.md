@@ -1,12 +1,12 @@
-# STEEL DESIGN ERP — Android
+# STEEL DESIGN ERP — Clean Start
 
-تطوير V8 يتم على الفرع المستقل [v8-real-app](https://github.com/salimsmati55-cmyk/STEEL-DESIGN-ERP-ANDROID/tree/v8-real-app)، مع عدم تعديل main.
+A fresh web application implementation. All application source is newly authored in `web/`; no previous app code or database schema is reused.
 
-## تطبيق V8 الحالي
-- [واجهة التطبيق V8](v8/www/index.html)
-- [ملخص المرحلة التشغيلية](docs/V8_OPERATIONAL_MVP_STAGE2.md)
-- [أساس التخزين المحلي](docs/V8_STORAGE_FOUNDATION_STAGE1.md)
-- [خط بناء Android APK](.github/workflows/android-apk.yml)
+- Arabic RTL responsive interface
+- Standalone IndexedDB database: `steel-design-clean-start`
+- Initial modules: dashboard, orders, production, inventory, customers, suppliers, payments, settings
+- Create/edit orders and finish production directly from the production list
+- JSON backup export
+- PWA manifest and offline app-shell cache
 
-## تنبيه
-تم إعداد مسار البناء ليعمل من فرع V8، لكن لا نعتبر APK جاهزاً أو مختبراً حتى ينجح GitHub Actions وتجربة التطبيق على جهاز Android فعلي. تبقى بيانات V7.11 محفوظة ولا تُحذف أثناء التطوير.
+Serve `web/` over localhost or HTTPS. This is an initial foundation, not a production-ready release; deeper accounting, inventory movement, archive protections, data validation, and automated testing remain to be implemented.
