@@ -111,8 +111,8 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-          import shutil
-          source = Path("$GITHUB_WORKSPACE/assets/steel-design-audio.js")
+          import shutil, os
+          source = Path(os.environ["GITHUB_WORKSPACE"]) / "assets/steel-design-audio.js"
           if not source.exists():
               raise SystemExit("Audio system source file is missing")
           html_files = [p for p in Path(".").rglob("index.html") if "node_modules" not in p.parts and "android" not in p.parts]
