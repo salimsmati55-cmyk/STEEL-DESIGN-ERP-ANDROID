@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+ <defs>
+  <linearGradient id="steel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".28" stop-color="#8e9aa5"/><stop offset=".52" stop-color="#f4f7fa"/><stop offset=".78" stop-color="#687581"/><stop offset="1" stop-color="#dce2e8"/></linearGradient>
+  <linearGradient id="orange" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff17a"/><stop offset=".35" stop-color="#ff9b13"/><stop offset="1" stop-color="#c94c00"/></linearGradient>
+  <radialGradient id="bg"><stop stop-color="#29343e"/><stop offset="1" stop-color="#080d13"/></radialGradient>
+  <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur in="SourceAlpha" stdDeviation="8"/><feOffset dy="9"/><feComponentTransfer><feFuncA type="linear" slope=".7"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ </defs>
+ <rect width="512" height="512" rx="88" fill="url(#bg)"/>
+ <path d="M0 80L512 0M0 170L512 90M0 260L512 180M0 350L512 270M0 440L512 360" stroke="#ffffff" stroke-opacity=".035" stroke-width="2"/>
+ <g filter="url(#shadow)" transform="translate(256 250)">
+  <path d="M-9-202h48l12 35 35 12 31-20 34 34-20 31 12 35 35 12v48l-35 12-12 35 20 31-34 34-31-20-35 12-12 35h-48l-12-35-35-12-31 20-34-34 20-31-12-35-35-12v-48l35-12 12-35-20-31 34-34 31 20 35-12z" fill="none" stroke="url(#steel)" stroke-width="15" stroke-linejoin="round"/>
+  <path d="M-158 107A190 190 0 0 1 150-119" fill="none" stroke="url(#orange)" stroke-width="12" stroke-linecap="round"/>
+  <text x="-174" y="103" font-family="DejaVu Sans,Arial,sans-serif" font-size="220" font-weight="900" font-style="italic" letter-spacing="-25" fill="url(#steel)" stroke="#26313a" stroke-width="3">S</text>
+  <text x="4" y="103" font-family="DejaVu Sans,Arial,sans-serif" font-size="220" font-weight="900" font-style="italic" letter-spacing="-20" fill="url(#steel)" stroke="#26313a" stroke-width="3">D</text>
+  <path d="M-8 122L55-28h63L56 122z" fill="url(#orange)" stroke="#7b3100" stroke-width="5"/>
+ </g>
+ <g transform="translate(402 91)" stroke="url(#orange)" stroke-width="5" stroke-linecap="round">
+  <path d="M0-52V-20M0 20V52M-52 0H-20M20 0H52M-37-37L-14-14M14 14L37 37M37-37L14-14M-14 14L-37 37"/>
+  <circle r="13" fill="#fff2a3" stroke="#ff9b13" stroke-width="4"/>
+ </g>
+ <path d="M82 443H430" stroke="#ff8a12" stroke-width="4" opacity=".8"/>
+</svg>
