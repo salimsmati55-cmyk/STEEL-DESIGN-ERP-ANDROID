@@ -1,47 +1,166 @@
+/* STEEL DESIGN AUDIO SYSTEM — V2
+ * Arabic speech uses the device's installed Android TTS voice.
+ * UI sounds are generated locally with Web Audio; no network or microphone.
+ */
 (() => {
-  if (window.SD_AUDIO) return;
-  const KEY="sd_audio_settings_v1", defaults={enabled:true,voice:true,effects:true,volume:.55,voiceURI:""};
-  let cfg={...defaults}; try{cfg={...defaults,...JSON.parse(localStorage.getItem(KEY)||"{}")};}catch{}
-  let ctx,panel;
-  const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(cfg));}catch{}};
-  function tone(freq=660,duration=.1,type="sine",offset=0){
-    if(!cfg.enabled||!cfg.effects)return;const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return;
-    if(!ctx)ctx=new AC();if(ctx.state==="suspended")ctx.resume().catch(()=>{});
-    const o=ctx.createOscillator(),g=ctx.createGain(),t=ctx.currentTime+offset;o.type=type;o.frequency.setValueAtTime(freq,t);
-    g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(Math.max(.001,cfg.volume*.12),t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+duration);
-    o.connect(g);g.connect(ctx.destination);o.start(t);o.stop(t+duration+.02);
+  "use strict";
+  if (window.SD_AUDIO?.version === "2.0") return;
+  const KEY = "sd_audio_settings_v2";
+  const defaults = { enabled:true, speech:true, effects:true, volume:0.62, rate:0.92, pitch:0.82, voiceURI:"", announceActions:true };
+  let cfg = {...defaults};
+  try { cfg = {...defaults, ...JSON.parse(localStorage.getItem(KEY) || "{}")}; } catch {}
+  let audioContext = null, panel = null, lastAnnouncement = "", lastAt = 0, voices = [];
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(cfg)); } catch {} };
+  const arabicVoices = () => (window.speechSynthesis?.getVoices?.() || []).filter(v => /^ar([_-]|$)/i.test(v.lang || ""));
+  function ctx() {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    if (!audioContext) audioContext = new AC();
+    if (audioContext.state === "suspended") audioContext.resume().catch(()=>{});
+    return audioContext;
   }
-  const sounds={click(){tone(520,.045);},success(){tone(660,.1);tone(880,.16,"sine",.11);},warning(){tone(440,.12,"triangle");tone(330,.18,"triangle",.14);},error(){tone(260,.22,"square");}};
-  const arabicVoices=()=>((window.speechSynthesis?.getVoices?.()||[]).filter(v=>/^ar([_-]|$)/i.test(v.lang||"")));
-  function speak(text){
-    if(!cfg.enabled||!cfg.voice||!("speechSynthesis"in window)||!text)return false;
-    try{window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang="ar";u.rate=.94;u.pitch=.88;u.volume=Math.max(.1,Math.min(1,cfg.volume));
-      const vs=arabicVoices(),v=vs.find(x=>x.voiceURI===cfg.voiceURI)||vs.find(x=>/male|masculin|ذكر/i.test(x.name))||vs[0];if(v){u.voice=v;u.lang=v.lang;}window.speechSynthesis.speak(u);return true;
-    }catch{return false;}
+  function note(freq, start, duration, wave="sine", peak=0.10) {
+    if (!cfg.enabled || !cfg.effects) return;
+    const c=ctx(); if(!c) return;
+    const o=c.createOscillator(), g=c.createGain(), t=c.currentTime+start;
+    o.type=wave; o.frequency.setValueAtTime(freq,t);
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.001,peak*cfg.volume),t+0.018);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+duration);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+duration+0.025);
   }
-  function announce(text,kind="success"){if(!cfg.enabled)return;(sounds[kind]||sounds.success)();if(text)setTimeout(()=>speak(text),180);}
-  function buildUI(){
-    if(!document.body||document.getElementById("sd-audio-fab"))return;
-    const st=document.createElement("style");st.id="sd-audio-style";
-    st.textContent='#sd-audio-fab{position:fixed;z-index:2147483000;right:14px;bottom:18px;width:48px;height:48px;border:0;border-radius:50%;background:#17232d;color:#fff;box-shadow:0 3px 14px #0004;font-size:21px}#sd-audio-panel{position:fixed;z-index:2147483001;right:12px;bottom:74px;width:min(310px,calc(100vw - 24px));background:#fff;color:#17232d;border:1px solid #d8dee5;border-radius:16px;padding:16px;box-shadow:0 8px 30px #0003;font:14px system-ui,sans-serif;direction:rtl}#sd-audio-panel[hidden]{display:none}#sd-audio-panel h3{margin:0 0 12px;font-size:17px}#sd-audio-panel label{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0}#sd-audio-panel select{max-width:150px}#sd-audio-panel button{border:0;border-radius:10px;padding:9px 12px;background:#168ac0;color:white}#sd-audio-panel .sd-row{display:flex;gap:8px;justify-content:space-between;align-items:center}#sd-audio-panel small{display:block;color:#687684;line-height:1.5;margin-top:10px}';
-    document.head.appendChild(st);
-    const fab=document.createElement("button");fab.id="sd-audio-fab";fab.type="button";fab.title="إعدادات الصوت";fab.textContent="🔊";
-    const p=document.createElement("section");p.id="sd-audio-panel";p.hidden=true;p.dir="rtl";
-    p.innerHTML='<h3>STEEL DESIGN AUDIO</h3><label>تشغيل النظام <input id="sd-a-enabled" type="checkbox"></label><label>الصوت البشري <input id="sd-a-voice" type="checkbox"></label><label>المؤثرات الصوتية <input id="sd-a-effects" type="checkbox"></label><label>مستوى الصوت <input id="sd-a-volume" type="range" min="0" max="1" step=".05"></label><label>الصوت العربي <select id="sd-a-voices"><option value="">الصوت الافتراضي للهاتف</option></select></label><div class="sd-row"><button id="sd-a-test" type="button">تجربة الصوت</button><button id="sd-a-close" type="button">إغلاق</button></div><small>يعتمد النطق العربي على محرك تحويل النص إلى كلام المثبّت في الهاتف. قد يتطلب تنزيل صوت عربي من إعدادات تحويل النص إلى كلام في Android.</small>';
-    document.body.append(fab,p);panel=p;
-    const en=p.querySelector("#sd-a-enabled"),vo=p.querySelector("#sd-a-voice"),ef=p.querySelector("#sd-a-effects"),vol=p.querySelector("#sd-a-volume"),sel=p.querySelector("#sd-a-voices");
-    const sync=()=>{en.checked=cfg.enabled;vo.checked=cfg.voice;ef.checked=cfg.effects;vol.value=cfg.volume;fab.textContent=cfg.enabled?"🔊":"🔇";};
-    const refresh=()=>{sel.innerHTML='<option value="">الصوت الافتراضي للهاتف</option>';arabicVoices().forEach(v=>{const o=document.createElement("option");o.value=v.voiceURI;o.textContent=v.name+" ("+v.lang+")";sel.append(o);});sel.value=cfg.voiceURI;};
+  const effects = {
+    click:()=>note(620,0,.045,"sine",.035),
+    save:()=>{note(660,0,.10);note(880,.12,.16);},
+    success:()=>{note(523,0,.11);note(659,.12,.11);note(784,.24,.22);},
+    warning:()=>{note(660,0,.12,"triangle");note(520,.17,.16,"triangle");},
+    error:()=>{note(310,0,.16,"sawtooth",.075);note(230,.18,.22,"sawtooth",.075);},
+    delivery:()=>{note(587,0,.10);note(740,.12,.10);note(880,.24,.25);},
+    production:()=>{note(440,0,.10);note(554,.12,.10);note(659,.24,.20);}
+  };
+  function chooseVoice() {
+    voices = arabicVoices();
+    return voices.find(v=>v.voiceURI===cfg.voiceURI) ||
+      voices.find(v=>/male|masculine|ذكر|رجل/i.test(v.name+" "+v.voiceURI)) || voices[0] || null;
+  }
+  function speak(message) {
+    if(!cfg.enabled || !cfg.speech || !("speechSynthesis" in window) || !message) return false;
+    try {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(String(message).slice(0,220));
+      const voice=chooseVoice();
+      utterance.lang=voice?.lang || "ar-SA";
+      if(voice) utterance.voice=voice;
+      utterance.rate=cfg.rate; utterance.pitch=cfg.pitch; utterance.volume=Math.max(.05,Math.min(1,cfg.volume));
+      window.speechSynthesis.speak(utterance);
+      return true;
+    } catch { return false; }
+  }
+  function announce(message, kind="success", spokenText) {
+    if(!cfg.enabled) return;
+    (effects[kind] || effects.success)();
+    if(spokenText || message) window.setTimeout(()=>speak(spokenText || message),180);
+  }
+  function classify(text) {
+    if(/خطأ|فشل|تعذر|غير صحيح|لم يتم|مرفوض/i.test(text)) return "error";
+    if(/تنبيه|تحذير|ناقص|متأخر|غير مكتمل/i.test(text)) return "warning";
+    if(/تسليم|جاهز للتسليم|تم التسليم/i.test(text)) return "delivery";
+    if(/إنتاج|الانتاج|اكتمل الإنتاج|إنهاء الإنتاج/i.test(text)) return "production";
+    if(/حفظ|تمت الإضافة|أضيف|تم التسجيل|تم الدفع|تم التسديد|تم إنهاء|نجاح|اكتمل/i.test(text)) return "success";
+    return null;
+  }
+  function maybeAnnounce(text) {
+    text=String(text||"").replace(/\s+/g," ").trim();
+    if(!text || text.length>180) return;
+    const kind=classify(text); if(!kind) return;
+    const now=Date.now();
+    if(text===lastAnnouncement && now-lastAt<2200) return;
+    lastAnnouncement=text; lastAt=now;
+    announce(text,kind);
+  }
+  function buildPanel() {
+    if(!document.body || document.getElementById("sd-audio-fab")) return;
+    const style=document.createElement("style"); style.id="sd-audio-style";
+    style.textContent=`
+      #sd-audio-fab{position:fixed;z-index:2147483000;right:14px;bottom:18px;width:50px;height:50px;border:0;border-radius:50%;background:#142b3b;color:#fff;box-shadow:0 5px 18px #0003;font-size:21px}
+      #sd-audio-panel{position:fixed;z-index:2147483001;right:12px;bottom:78px;width:min(330px,calc(100vw - 24px));max-height:78vh;overflow:auto;background:#fff;color:#182633;border:1px solid #dce4ea;border-radius:18px;padding:16px;box-shadow:0 12px 36px #0004;font:14px system-ui,sans-serif;direction:rtl}
+      #sd-audio-panel[hidden]{display:none}#sd-audio-panel h3{margin:0 0 4px;font-size:17px}#sd-audio-panel .sub{color:#647584;font-size:11px;margin-bottom:12px}
+      #sd-audio-panel label{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0}
+      #sd-audio-panel input[type=range]{width:125px}#sd-audio-panel select{max-width:165px;padding:7px;border:1px solid #ccd6df;border-radius:8px}
+      #sd-audio-panel button{border:0;border-radius:10px;padding:10px 13px;background:#087eaa;color:white;font-weight:600}
+      #sd-audio-panel .sd-row{display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:12px}
+      #sd-audio-panel small{display:block;color:#687684;line-height:1.6;margin-top:10px}
+    `;
+    document.head.appendChild(style);
+    const fab=document.createElement("button"); fab.id="sd-audio-fab"; fab.type="button"; fab.title="إعدادات الصوت"; fab.setAttribute("aria-label","إعدادات الصوت"); fab.textContent="🔊";
+    const p=document.createElement("section"); p.id="sd-audio-panel"; p.hidden=true; p.dir="rtl";
+    p.innerHTML=`<h3>STEEL DESIGN AUDIO</h3><div class="sub">نظام التنبيهات الصوتية للورشة</div>
+      <label>تشغيل النظام <input id="sd-enabled" type="checkbox"></label>
+      <label>النطق العربي <input id="sd-speech" type="checkbox"></label>
+      <label>المؤثرات الصوتية <input id="sd-effects" type="checkbox"></label>
+      <label>الإعلان عند نجاح العمليات <input id="sd-actions" type="checkbox"></label>
+      <label>مستوى الصوت <input id="sd-volume" type="range" min="0.05" max="1" step="0.05"></label>
+      <label>سرعة النطق <input id="sd-rate" type="range" min="0.75" max="1.15" step="0.05"></label>
+      <label>الصوت العربي <select id="sd-voices"><option value="">الصوت الافتراضي للهاتف</option></select></label>
+      <div class="sd-row"><button id="sd-test" type="button">اختبار الصوت</button><button id="sd-close" type="button">إغلاق</button></div>
+      <small id="sd-note">الصوت الرجالي يتوقف على الأصوات العربية المثبتة في Android. إذا لم يظهر صوت مناسب، نزّل صوتاً عربياً من إعدادات تحويل النص إلى كلام في الهاتف.</small>`;
+    document.body.append(fab,p); panel=p;
+    const $=id=>p.querySelector("#"+id);
+    const sync=()=>{$("sd-enabled").checked=cfg.enabled;$("sd-speech").checked=cfg.speech;$("sd-effects").checked=cfg.effects;$("sd-actions").checked=cfg.announceActions;$("sd-volume").value=cfg.volume;$("sd-rate").value=cfg.rate;fab.textContent=cfg.enabled?"🔊":"🔇";};
+    const refresh=()=>{const s=$("sd-voices");s.innerHTML='<option value="">الصوت الافتراضي للهاتف</option>';voices=arabicVoices();voices.forEach(v=>{const o=document.createElement("option");o.value=v.voiceURI;o.textContent=v.name+" — "+v.lang;s.append(o);});s.value=cfg.voiceURI;};
     fab.addEventListener("click",()=>{p.hidden=!p.hidden;if(!p.hidden){refresh();sync();}});
-    p.querySelector("#sd-a-close").addEventListener("click",()=>p.hidden=true);
-    en.addEventListener("change",()=>{cfg.enabled=en.checked;save();sync();});vo.addEventListener("change",()=>{cfg.voice=vo.checked;save();});ef.addEventListener("change",()=>{cfg.effects=ef.checked;save();});vol.addEventListener("input",()=>{cfg.volume=Number(vol.value);save();});sel.addEventListener("change",()=>{cfg.voiceURI=sel.value;save();});
-    p.querySelector("#sd-a-test").addEventListener("click",()=>{if(!cfg.enabled){cfg.enabled=true;save();sync();}announce("مرحباً بك في نظام ستيل ديزاين. تم تشغيل النظام الصوتي بنجاح.","success");});
-    if(window.speechSynthesis)window.speechSynthesis.onvoiceschanged=refresh;sync();
+    $("sd-close").addEventListener("click",()=>p.hidden=true);
+    $("sd-enabled").addEventListener("change",e=>{cfg.enabled=e.target.checked;save();sync();});
+    $("sd-speech").addEventListener("change",e=>{cfg.speech=e.target.checked;save();});
+    $("sd-effects").addEventListener("change",e=>{cfg.effects=e.target.checked;save();});
+    $("sd-actions").addEventListener("change",e=>{cfg.announceActions=e.target.checked;save();});
+    $("sd-volume").addEventListener("input",e=>{cfg.volume=+e.target.value;save();});
+    $("sd-rate").addEventListener("input",e=>{cfg.rate=+e.target.value;save();});
+    $("sd-voices").addEventListener("change",e=>{cfg.voiceURI=e.target.value;save();});
+    $("sd-test").addEventListener("click",()=>{if(!cfg.enabled)cfg.enabled=true;cfg.speech=true;cfg.effects=true;save();sync();announce("مرحباً بك في نظام ستيل ديزاين. الصوت والتنبيهات جاهزة للعمل.","success");});
+    sync(); refresh();
   }
-  const ok=/تم الحفظ|حفظ بنجاح|تمت الإضافة|أضيف بنجاح|تم التسجيل|تم الدفع|تم التسديد|تم إنهاء|اكتمل الإنتاج|جاهز للتسليم|تمت العملية بنجاح/i;
-  const bad=/حدث خطأ|تعذر|فشل|غير صحيح|مطلوب إدخال|يرجى إدخال/i,warn=/تنبيه|متأخر|ناقص|غير مكتمل/i;
-  function watch(){const ob=new MutationObserver(rs=>{for(const r of rs)for(const n of r.addedNodes){if(n.nodeType!==1)continue;const t=(n.innerText||n.textContent||"").trim();if(!t||t.length>180)continue;if(ok.test(t)){announce(t.slice(0,150),"success");return;}if(bad.test(t)){announce(t.slice(0,130),"error");return;}if(warn.test(t)){announce(t.slice(0,130),"warning");return;}}});ob.observe(document.body,{childList:true,subtree:true});}
-  document.addEventListener("click",e=>{const b=e.target.closest("button,[role=button],input[type=submit]");if(b&&!b.closest("#sd-audio-panel")&&b.id!=="sd-audio-fab")sounds.click();},true);
-  window.SD_AUDIO={speak,announce,success:()=>announce("تمت العملية بنجاح","success"),warning:()=>announce("تنبيه، يرجى الانتباه","warning"),error:()=>announce("حدث خطأ، يرجى المحاولة مرة أخرى","error"),settings:()=>{buildUI();panel.hidden=false;}};
-  const init=()=>{buildUI();watch();};if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
+  function observeMessages() {
+    const observer=new MutationObserver(records=>{
+      for(const record of records) {
+        const el=record.target.nodeType===1?record.target:record.target.parentElement;
+        if(!el) continue;
+        const live=el.closest?.('[role="alert"],[role="status"],[aria-live],.toast,.notification,.alert,.snackbar');
+        if(live) { maybeAnnounce(live.innerText||live.textContent); continue; }
+        for(const node of record.addedNodes||[]) if(node.nodeType===1) {
+          const candidate=node.matches?.('[role="alert"],[role="status"],[aria-live],.toast,.notification,.alert,.snackbar')?node:node.querySelector?.('[role="alert"],[role="status"],[aria-live],.toast,.notification,.alert,.snackbar');
+          if(candidate) maybeAnnounce(candidate.innerText||candidate.textContent);
+        }
+      }
+    });
+    observer.observe(document.body,{childList:true,subtree:true,characterData:true});
+  }
+  document.addEventListener("click",e=>{
+    const b=e.target.closest?.("button,[role=button],input[type=submit]");
+    if(!b || b.closest("#sd-audio-panel") || b.id==="sd-audio-fab") return;
+    if(cfg.enabled && cfg.effects) effects.click();
+    if(cfg.announceActions) {
+      const label=(b.innerText||b.getAttribute("aria-label")||b.value||"").trim();
+      if(/حفظ|تأكيد|تسليم|إنهاء|طباعة|دفع|تسجيل/i.test(label)) {
+        // The click itself is not treated as success; actual status messages are announced by the observer.
+      }
+    }
+  },true);
+  window.addEventListener("sd:audio",e=>{
+    const d=e.detail||{}; announce(d.message||"",d.kind||"success",d.speech);
+  });
+  window.SD_AUDIO={
+    version:"2.0", speak, announce,
+    success:message=>announce(message||"تمت العملية بنجاح","success"),
+    saved:message=>announce(message||"تم الحفظ بنجاح","save"),
+    warning:message=>announce(message||"تنبيه، يرجى الانتباه","warning"),
+    error:message=>announce(message||"حدث خطأ، يرجى المحاولة مرة أخرى","error"),
+    production:message=>announce(message||"اكتمل الإنتاج","production"),
+    delivery:message=>announce(message||"الطلبية جاهزة للتسليم","delivery"),
+    settings:()=>{buildPanel();panel.hidden=false;},
+    setEnabled:value=>{cfg.enabled=!!value;save();if(panel)panel.querySelector("#sd-enabled").checked=cfg.enabled;}
+  };
+  const init=()=>{buildPanel();observeMessages();};
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init,{once:true}); else init();
+  if(window.speechSynthesis) window.speechSynthesis.addEventListener?.("voiceschanged",()=>{voices=arabicVoices();});
 })();
