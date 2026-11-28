@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f7fa">
+<title>STEEL DESIGN ERP V11.2 — Order Edit</title>
+<style>
+:root{font-family:Tahoma,"Segoe UI",Arial,sans-serif;color:#182536;background:#f5f7fa;--line:#e2e8f0;--blue:#1d4ed8;--muted:#718096}
+*{box-sizing:border-box}body{margin:0;background:#f5f7fa}button,input,select,textarea{font:inherit}button{cursor:pointer}
+header{height:60px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 13px;position:sticky;top:0;z-index:5}
+.brand{display:flex;align-items:center;gap:9px}.logo{width:36px;height:36px;border-radius:10px;background:#172f52;color:white;display:grid;place-items:center;font-weight:900}.brand b{font-size:13px}.brand small{display:block;font-size:9px;color:var(--muted);margin-top:3px}
+main{padding:14px 12px 90px;max-width:760px;margin:auto}.pagehead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:7px 0 14px}.pagehead h1{font-size:20px;margin:0 0 4px}.muted{font-size:11px;color:var(--muted)}
+.btn{border:1px solid var(--line);background:#fff;color:#25364b;border-radius:9px;padding:10px 12px;font-weight:700;font-size:12px}.btn.primary{background:#1d4ed8;border-color:#1d4ed8;color:white}.btn.soft{background:#eef3ff;color:#1d4ed8;border-color:#dbe6ff}.btn.danger{color:#b91c1c}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.card,.panel{background:#fff;border:1px solid var(--line);border-radius:13px;padding:13px;box-shadow:0 3px 14px #1e293b06}.stat-label{font-size:11px;color:var(--muted)}.stat-value{font-size:24px;font-weight:900;margin-top:7px}.panel{margin-top:12px}.panel h2{font-size:14px;margin:0 0 12px}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:8;background:#fff;border-top:1px solid var(--line);display:flex;gap:4px;overflow:auto;padding:7px 6px calc(7px + env(safe-area-inset-bottom));}
+nav button{flex:1;min-width:62px;border:0;background:transparent;border-radius:8px;padding:9px 5px;font-size:10px;color:#526174;font-weight:bold}nav button.active{background:#eaf1ff;color:#1d4ed8}
+.list{display:grid;gap:8px}.job{border:1px solid var(--line);border-radius:10px;padding:11px;background:#fff}.jobtop{display:flex;justify-content:space-between;gap:8px}.job b{font-size:12px}.job p{font-size:11px;color:var(--muted);margin:6px 0}.pill{font-size:10px;background:#eaf8ef;color:#15803d;border-radius:20px;padding:5px 8px;white-space:nowrap}
+.modal{position:fixed;inset:0;background:#0f172a77;z-index:10;display:none;align-items:flex-end;padding:0}.modal.open{display:flex}.dialog{background:#fff;border-radius:18px 18px 0 0;padding:15px 13px calc(18px + env(safe-area-inset-bottom));width:100%;max-height:94dvh;overflow:auto}.dialoghead{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.dialoghead h2{font-size:17px;margin:0}
+.formgrid{display:grid;grid-template-columns:1fr;gap:11px}.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:12px;font-weight:bold;color:#526174}.field input,.field select,.field textarea{border:1px solid #d5dee9;border-radius:9px;padding:11px;background:white;color:#182536;width:100%;font-size:16px;min-height:44px}.field textarea{min-height:75px}
+.kroki{border:1px solid #dbe4ef;border-radius:12px;padding:10px;background:#fbfdff}.khead{display:flex;justify-content:space-between;gap:8px;font-size:12px;margin-bottom:9px}.khead span,.hint{font-size:10px;color:#718096}.tools{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}.tools button{border:1px solid #d7e0eb;background:#fff;border-radius:8px;padding:8px 9px;font-size:11px;min-height:36px}.canvaswrap{height:160px;overflow:auto;border:1px solid #cbd5e1;border-radius:8px;background:white;touch-action:pan-x pan-y}.canvas{width:100%;height:100%;display:block;touch-action:none;user-select:none;-webkit-user-select:none}.photos{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}.photo{width:74px;height:74px;position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden}.photo img{width:100%;height:100%;object-fit:cover}.photo button{position:absolute;top:2px;left:2px;border:0;border-radius:50%;background:#fff}
+.expanded{position:fixed;inset:5px;z-index:20;background:white;display:flex;flex-direction:column}.expanded .canvaswrap{height:auto;flex:1}.tool.active{background:#eaf1ff!important;border-color:#1d4ed8!important;color:#1d4ed8;font-weight:900}.kroki .tools button{min-width:42px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.empty{text-align:center;padding:24px;color:var(--muted);font-size:12px}
+@media(min-width:700px){main{padding:24px}.modal{align-items:center;justify-content:center;padding:15px}.dialog{max-width:620px;border-radius:16px}.formgrid{grid-template-columns:1fr 1fr}.field.full{grid-column:1/-1}.canvaswrap{height:190px}}
+.ops-editor{overflow-x:auto;border:1px solid #dbe3ed;border-radius:10px;padding:10px}.ops-table{width:100%;border-collapse:collapse;min-width:560px;font-size:13px}.ops-table th,.ops-table td{padding:7px;border-bottom:1px solid #e5eaf0;text-align:center}.ops-table input{width:100%;min-width:75px;padding:8px;border:1px solid #ccd6e2;border-radius:7px}.ops-table .op-name{min-width:130px}.op-line-total{font-weight:700;white-space:nowrap}.op-remove{border:0;background:#fff0f0;color:#b42318;border-radius:7px;padding:7px 10px}.ops-editor .btn{margin-top:9px}
+/* V9.4 portrait-first app shell */
+html,body{width:100%;height:100%;min-height:100%;overscroll-behavior:none}
+body{min-height:100dvh;background:#eef2f7}
+header{height:58px;padding-inline:14px;box-shadow:0 2px 10px #172f520b}
+main{width:100%;max-width:560px;min-height:calc(100dvh - 116px);margin:0 auto;padding:14px 12px calc(100px + env(safe-area-inset-bottom))}
+nav{max-width:560px;margin:0 auto;border-radius:16px 16px 0 0;box-shadow:0 -5px 22px #172f5210;padding-inline:8px}
+.modal{align-items:stretch;justify-content:center;padding:0;background:#eef2f7}
+.dialog{width:100%;max-width:560px;height:100dvh;max-height:100dvh;border-radius:0;padding:0;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 0 30px #172f5215}
+.dialoghead{flex:0 0 58px;margin:0;padding:0 14px;border-bottom:1px solid var(--line);background:#fff;position:relative;z-index:2}
+#modalBody{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:12px 12px calc(18px + env(safe-area-inset-bottom))}
+.formgrid{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+.field.full{grid-column:1}
+.field input,.field select,.field textarea{border-radius:11px;background:#fbfcfe}
+.actions{position:sticky;bottom:-1px;background:#fff;padding:10px 12px calc(8px + env(safe-area-inset-bottom));margin:14px -12px -18px;border-top:1px solid var(--line);z-index:3}
+.actions button{flex:1;min-height:48px}
+.ops-editor{padding:0;border:0;overflow:visible;background:transparent}
+.operations-list{display:grid;gap:10px}
+.operation-card{background:#f8faff;border:1px solid #dce5f1;border-radius:13px;padding:11px;display:grid;gap:9px}
+.operation-card-head,.operation-total{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.operation-card-head b{font-size:12px;color:#334155}
+.op-field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.op-field span,.operation-total span{font-size:11px;color:#64748b;font-weight:700}
+.op-field input{width:100%;min-width:0;padding:10px;border:1px solid #d5dee9;border-radius:9px;background:white;font-size:16px;min-height:43px}
+.op-numbers{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.operation-total{border-top:1px dashed #cbd5e1;padding-top:8px}
+.operation-total strong{font-size:14px;color:#1d4ed8}
+.op-remove{border:0;background:#fff0f0;color:#b42318;border-radius:8px;padding:7px 10px;font-size:11px;font-weight:700}
+.add-op-btn{width:100%;min-height:45px;margin-top:10px}
+.canvaswrap{height:190px}
+@media(min-width:700px){main{padding:24px 18px 100px}.dialog{max-width:560px}.formgrid{grid-template-columns:minmax(0,1fr)}.field.full{grid-column:1}}
+@media(max-width:380px){.op-field input{padding:9px;font-size:15px}.dialoghead h2{font-size:15px}}
+
+.service-picks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:8px}
+.service-picks label{display:flex;align-items:center;gap:9px;padding:11px 12px;border:1px solid var(--line,#dbe2ea);border-radius:10px;background:var(--card,#fff);font-weight:600}
+.service-picks input{width:19px;height:19px;accent-color:#2563eb}
+@media(max-width:520px){.service-picks{grid-template-columns:1fr 1fr}.service-picks label{font-size:13px;padding:10px 8px}}
+</style>
+</head>
+<body>
+<header><div class="brand"><div class="logo">SD</div><div><b>STEEL DESIGN ERP</b><small>V11.2 · Workshop App · Order Edit</small></div></div><button class="btn" id="backup">نسخ احتياطي</button></header>
+<main id="app"></main>
+<nav>
+<button class="active" data-page="home">الرئيسية</button><button data-page="jobs">الطلبات</button><button data-page="production">الإنتاج</button><button data-page="stock">المخزون</button><button data-page="customers">الزبائن</button>
+</nav>
+<div class="modal" id="modal"><div class="dialog"><div class="dialoghead"><h2 id="modalTitle">طلب جديد</h2><button class="btn" id="close">إغلاق</button></div><div id="modalBody"></div></div></div>
+<script>
+const $=s=>document.querySelector(s), app=$("#app");
+const KEY="steel-design-v91-web-preview";
+let db=JSON.parse(localStorage.getItem(KEY)||'{"jobs":[],"stock":[],"customers":[]}'),page="home",draftPhotos=[],strokes=[],zoom=1,canvas,ctx,activeTool="pen",dimensionStart=null,dimensionLabels=[];
+db.jobs=Array.isArray(db.jobs)?db.jobs:[];db.stock=Array.isArray(db.stock)?db.stock:[];db.customers=Array.isArray(db.customers)?db.customers:[];
+const save=()=>localStorage.setItem(KEY,JSON.stringify(db));
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const id=()=> "OF-"+new Date().toISOString().slice(2,10).replaceAll("-","")+"-"+Math.random().toString(36).slice(2,5).toUpperCase();
+function head(title,sub,button=""){return `<div class="pagehead"><div><h1>${title}</h1><div class="muted">${sub}</div></div>${button}</div>`}
+function sdPrintWindow(title,body,css){
+ const w=window.open("","_blank");
+ if(!w){alert("اسمح بالنوافذ المنبثقة لهذا التطبيق ثم أعد المحاولة");return}
+ w.document.open();
+ w.document.write(`<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><style>${css}</style></head><body>${body}<script>window.onload=()=>setTimeout(()=>window.print(),350)<\/script></body></html>`);
+ w.document.close();
+}
+function printBON(j){
+ const ops=(j.operations||[]).map(o=>`<tr><td>${esc(o.name||"عملية")}</td><td>${Number(o.qty||0)}</td><td>${Number(o.unitPrice||0).toLocaleString("fr-FR")}</td><td>${Number(o.lineTotal||((o.qty||0)*(o.unitPrice||0))).toLocaleString("fr-FR")}</td></tr>`).join("");
+ const total=Number(j.total||0),paid=Number(j.paid||0),remain=total-paid;
+ const body=`<header><h2>STEEL DESIGN</h2><b>BON CLIENT</b></header><hr><p><b>رقم الطلب:</b> ${esc(j.id)}</p><p><b>الزبون:</b> ${esc(j.customer||"—")}</p><p><b>الهاتف:</b> ${esc(j.phone||"—")}</p><p><b>القطعة:</b> ${esc(j.description||"—")}</p><table><thead><tr><th>العملية</th><th>كمية</th><th>سعر الوحدة</th><th>المجموع</th></tr></thead><tbody>${ops||`<tr><td>${esc(j.service||"الخدمة")}</td><td>${j.qty||1}</td><td>${total.toLocaleString("fr-FR")}</td><td>${total.toLocaleString("fr-FR")}</td></tr>`}</tbody></table><section><p>الإجمالي: <b>${total.toLocaleString("fr-FR")} دج</b></p><p>المدفوع: <b>${paid.toLocaleString("fr-FR")} دج</b></p><p class="remain">المتبقي: <b>${remain.toLocaleString("fr-FR")} دج</b></p></section><footer>شكراً لثقتكم بـ STEEL DESIGN</footer>`;
+ sdPrintWindow("BON CLIENT "+j.id,body,`@page{size:80mm auto;margin:4mm}*{box-sizing:border-box}body{font-family:Tahoma,Arial,sans-serif;width:72mm;margin:0 auto;color:#111;font-size:11px}header{text-align:center}h2{font-size:18px;margin:3px}header b{font-size:15px}p{margin:6px 0;line-height:1.5}table{width:100%;border-collapse:collapse;font-size:9px;margin-top:10px}th,td{border-bottom:1px dashed #777;padding:5px 2px;text-align:center}th:first-child,td:first-child{text-align:right}section{border-top:1px solid #111;margin-top:10px;padding-top:6px}.remain{font-size:13px;border-top:1px solid #111;padding-top:6px}footer{text-align:center;margin-top:16px;border-top:1px dashed #777;padding-top:8px}`);
+}
+function printLabel(j){
+ const body=`<main><h3>STEEL DESIGN</h3><div class="code">${esc(j.id)}</div><b class="item">${esc(j.description||j.service||"قطعة معدنية")}</b><p>الزبون: ${esc(j.customer||"—")}</p><div>الكمية: <b>${Number(j.qty||1)}</b></div><div>المادة: ${esc(j.material||"—")} · ${esc(j.thickness||"—")} mm</div><div>الأبعاد: ${esc(j.dimensions||"—")}</div></main>`;
+ sdPrintWindow("ملصق القطعة "+j.id,body,`@page{size:60mm 40mm;margin:2mm}*{box-sizing:border-box}body{font-family:Tahoma,Arial,sans-serif;margin:0;color:#111}main{width:56mm;height:36mm;overflow:hidden;border:1px solid #222;padding:2mm;text-align:center}h3{font-size:12px;margin:0 0 2mm}.code{font-size:10px;border-bottom:1px solid #777;padding-bottom:1mm;margin-bottom:1mm}.item{font-size:12px;display:block;margin:1mm 0}p,div{font-size:9px;margin:1mm 0}`);
+}
+
+function render(){
+document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page));if(page==="home")home();if(page==="jobs")jobs();if(page==="production")production();if(page==="stock")stock();if(page==="customers")customers();}
+function home(){app.innerHTML=head("مركز القيادة","نظرة عامة على نشاط الورشة",'<button class="btn primary" id="new">+ طلب جديد</button>')+`<div class="stats"><div class="card"><div class="stat-label">إجمالي الطلبات</div><div class="stat-value">${db.jobs.length}</div></div><div class="card"><div class="stat-label">قيد التنفيذ</div><div class="stat-value">${db.jobs.filter(x=>x.status==="جديد"||x.status==="قيد التنفيذ").length}</div></div><div class="card"><div class="stat-label">مكتملة</div><div class="stat-value">${db.jobs.filter(x=>x.status==="جاهز للتسليم"||x.status==="مكتمل").length}</div></div><div class="card"><div class="stat-label">الزبائن</div><div class="stat-value">${new Set(db.jobs.map(x=>x.customer)).size}</div></div></div><section class="panel"><h2>آخر الطلبات</h2>${jobList(db.jobs.slice().reverse().slice(0,5))}</section>`;$("#new").onclick=newJob;}
+function jobList(rows){return rows.length?'<div class="list">'+rows.map(j=>`<div class="job"><div class="jobtop"><b>${esc(j.id)} · ${esc(j.customer)}</b><span class="pill">${esc(j.status)}</span></div><p>${esc(j.description)} · ${esc((j.services&&j.services.length)?j.services.join("، "):j.service)} · الكمية ${j.qty}</p><button class="btn soft" data-open="${j.id}">التفاصيل والكروكي</button></div>`).join("")+'</div>':'<div class="empty">لا توجد طلبات بعد. أنشئ أول طلب للبدء.</div>'}
+function jobs(){app.innerHTML=head("طلبات الورشة","الطلبات المحفوظة على هذا الجهاز",'<button class="btn primary" id="new">+ طلب جديد</button>')+`<section class="panel">${jobList(db.jobs.slice().reverse())}</section>`;$("#new").onclick=newJob;bindOpen();}
+function bindOpen(){document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>detail(b.dataset.open));}
+function production(){
+ const active=db.jobs.filter(j=>j.status!=="مكتمل"&&j.status!=="جاهز للتسليم");
+ const ready=db.jobs.filter(j=>j.status==="جاهز للتسليم");
+ app.innerHTML=head("لوحة الإنتاج","متابعة مراحل التصنيع والمواد لكل أمر تصنيع")+
+ `<div class="stats"><div class="card"><div class="stat-label">طلبات تنتظر البدء</div><div class="stat-value">${db.jobs.filter(j=>j.status==="جديد").length}</div></div><div class="card"><div class="stat-label">قيد الإنتاج</div><div class="stat-value">${db.jobs.filter(j=>j.status==="قيد التنفيذ").length}</div></div><div class="card"><div class="stat-label">جاهزة للتسليم</div><div class="stat-value">${ready.length}</div></div></div>`+
+ `<section class="panel"><h2>أوامر التصنيع المفتوحة</h2>${active.length?'<div class="list">'+active.map(j=>{const stages=j.productionStages||((j.services||[j.service]).filter(Boolean).map(n=>({name:n,status:"انتظار"})));const done=stages.filter(x=>x.status==="مكتمل").length;return `<div class="job"><div class="jobtop"><b>${esc(j.id)} · ${esc(j.customer)}</b><span class="pill">${esc(j.status)}</span></div><p>${esc(j.description)} · ${esc(j.material||"مادة غير محددة")} · ${esc(j.qty)} قطعة</p><p>تقدم العمليات: ${done}/${stages.length} مكتملة</p><button class="btn soft" data-open="${esc(j.id)}">فتح أمر التصنيع ومراحل الإنتاج</button><button class="btn primary" data-ready="${esc(j.id)}">إنهاء ملف الإنتاج · جاهز للتسليم</button></div>`}).join("")+'</div>':'<div class="empty">لا توجد أوامر تصنيع مفتوحة.</div>'}</section>`+
+ `<section class="panel"><h2>طلبات جاهزة للتسليم</h2>${ready.length?'<div class="list">'+ready.map(j=>`<div class="job"><div class="jobtop"><b>${esc(j.id)} · ${esc(j.customer)}</b><span class="pill">جاهز للتسليم</span></div><p>${esc(j.description)} · الكمية ${esc(j.qty)}</p><button class="btn soft" data-open="${esc(j.id)}">تفاصيل الطلب</button></div>`).join('')+'</div>':'<div class="empty">لا توجد طلبات جاهزة للتسليم حالياً.</div>'}</section>`;
+ bindOpen();document.querySelectorAll("[data-ready]").forEach(b=>b.onclick=()=>markReady(b.dataset.ready));
+}
+
+function stock(){
+ const rows=Array.isArray(db.stock)?db.stock:[];
+ const zones=[["A","مواد مستلمة تنتظر الفحص"],["B","مواد معتمدة وجاهزة للإنتاج"],["C","منتجات مكتملة وجاهزة للتسليم"]];
+ const total=rows.reduce((s,x)=>s+Number(x.qty||0),0);
+ app.innerHTML=head("إدارة المخزون","تسجيل المواد والصفائح والبقايا ومتابعة مواقع التخزين",'<button class="btn primary" id="addStock">＋ إضافة مادة</button>')+
+ `<div class="stats"><div class="card"><div class="stat-label">عدد الأصناف</div><div class="stat-value">${rows.length}</div></div><div class="card"><div class="stat-label">إجمالي الكميات</div><div class="stat-value">${total.toLocaleString("fr-DZ")}</div></div></div>`+
+ zones.map(([z,desc])=>{const list=rows.filter(x=>(x.zone||"A")===z);return `<section class="panel"><h2>المنطقة ${z}</h2><div class="muted">${desc}</div>${list.length?'<div class="list" style="margin-top:10px">'+list.map(x=>`<div class="job"><div class="jobtop"><b>${esc(x.name||"مادة")}</b><span class="pill">${Number(x.qty||0)} ${esc(x.unit||"قطعة")}</span></div><p>${esc(x.material||"—")} · ${esc(x.thickness||"—")} mm · ${esc(x.dimensions||"—")}</p><p>النوع: ${esc(x.kind||"مخزون")} ${x.supplier?'· المورد: '+esc(x.supplier):''}</p>${x.notes?`<p>${esc(x.notes)}</p>`:""}<div class="actions"><button class="btn soft" data-stock-edit="${esc(x.id)}">تعديل</button><button class="btn" data-stock-move="${esc(x.id)}">نقل منطقة</button><button class="btn danger" data-stock-del="${esc(x.id)}">حذف</button></div></div>`).join("")+'</div>':'<div class="empty">لا توجد مواد مسجلة في هذه المنطقة.</div>'}</section>`}).join("");
+ $("#addStock").onclick=()=>stockForm();
+ document.querySelectorAll("[data-stock-edit]").forEach(b=>b.onclick=()=>stockForm(b.dataset.stockEdit));
+ document.querySelectorAll("[data-stock-move]").forEach(b=>b.onclick=()=>stockMove(b.dataset.stockMove));
+ document.querySelectorAll("[data-stock-del]").forEach(b=>b.onclick=()=>{const x=db.stock.find(x=>x.id===b.dataset.stockDel);if(x&&confirm("حذف الصنف "+(x.name||"")+" من المخزون؟")){db.stock=db.stock.filter(y=>y.id!==x.id);save();stock()}});
+}
+function stockForm(key){
+ const old=key?db.stock.find(x=>x.id===key):null;if(key&&!old)return;
+ modal(old?"تعديل صنف المخزون":"إضافة مادة إلى المخزون",`<form id="stockForm"><div class="formgrid">
+ <div class="field full"><label>اسم المادة / الصنف *</label><input name="name" required value="${esc(old?.name||"")} " placeholder="مثال: صفيحة Inox 304"></div>
+ <div class="field"><label>التصنيف</label><select name="kind"><option ${old?.kind==="صفائح"?"selected":""}>صفائح</option><option ${old?.kind==="بقايا"?"selected":""}>بقايا</option><option ${old?.kind==="منتج تام"?"selected":""}>منتج تام</option><option ${old?.kind==="مستلزمات"?"selected":""}>مستلزمات</option><option ${old?.kind==="مخزون"||!old?"selected":""}>مخزون</option></select></div>
+ <div class="field"><label>المادة</label><input name="material" value="${esc(old?.material||"")}" placeholder="Inox 304 / Fer..."></div>
+ <div class="field"><label>السماكة (mm)</label><input name="thickness" type="number" step="0.1" min="0" value="${esc(old?.thickness||"")}"></div>
+ <div class="field"><label>الأبعاد (mm)</label><input name="dimensions" value="${esc(old?.dimensions||"")}" placeholder="1500 × 3000"></div>
+ <div class="field"><label>الكمية *</label><input name="qty" type="number" step="0.01" min="0" required value="${esc(old?.qty??1)}"></div>
+ <div class="field"><label>وحدة القياس</label><select name="unit"><option ${old?.unit==="صفيحة"?"selected":""}>صفيحة</option><option ${old?.unit==="قطعة"||!old?"selected":""}>قطعة</option><option ${old?.unit==="متر"?"selected":""}>متر</option><option ${old?.unit==="كغ"?"selected":""}>كغ</option><option ${old?.unit==="علبة"?"selected":""}>علبة</option></select></div>
+ <div class="field"><label>منطقة التخزين</label><select name="zone"><option value="A" ${(!old||old.zone==="A")?"selected":""}>A — مستلم / ينتظر الفحص</option><option value="B" ${old?.zone==="B"?"selected":""}>B — معتمد / جاهز للإنتاج</option><option value="C" ${old?.zone==="C"?"selected":""}>C — منتج تام / جاهز للتسليم</option></select></div>
+ <div class="field"><label>المورد</label><input name="supplier" value="${esc(old?.supplier||"")}"></div>
+ <div class="field full"><label>ملاحظات</label><textarea name="notes">${esc(old?.notes||"")}</textarea></div>
+ </div><div class="actions"><button class="btn primary" type="submit">حفظ المخزون</button><button class="btn" type="button" id="stockCancel">إلغاء</button></div></form>`);
+ $("#stockCancel").onclick=()=>$("#modal").classList.remove("open");
+ $("#stockForm").onsubmit=e=>{e.preventDefault();const f=new FormData(e.target);const item={...(old||{}),id:old?.id||("ST-"+Date.now().toString(36).toUpperCase()),name:String(f.get("name")||"").trim(),kind:f.get("kind"),material:String(f.get("material")||"").trim(),thickness:f.get("thickness"),dimensions:String(f.get("dimensions")||"").trim(),qty:Number(f.get("qty")||0),unit:f.get("unit"),zone:f.get("zone"),supplier:String(f.get("supplier")||"").trim(),notes:String(f.get("notes")||"").trim(),updatedAt:new Date().toISOString()};if(old){const i=db.stock.findIndex(x=>x.id===old.id);if(i>=0)db.stock[i]=item}else{item.createdAt=new Date().toISOString();db.stock.push(item)}save();$("#modal").classList.remove("open");stock()};
+}
+function stockMove(key){
+ const item=db.stock.find(x=>x.id===key);if(!item)return;
+ const next=prompt("اختر المنطقة الجديدة للصنف "+item.name+"\nA = مستلم وينتظر الفحص\nB = معتمد وجاهز للإنتاج\nC = منتج تام وجاهز للتسليم",item.zone||"A");
+ if(!next)return;const zone=next.trim().toUpperCase();if(!["A","B","C"].includes(zone)){alert("الرجاء إدخال A أو B أو C");return}
+ item.zone=zone;item.updatedAt=new Date().toISOString();save();stock();
+}
+
+function customers(){const names=[...new Set(db.jobs.map(j=>j.customer))];app.innerHTML=head("الزبائن","الزبائن المسجلون من الطلبات")+'<section class="panel">'+(names.length?names.map(n=>`<div class="job">${esc(n)}</div>`).join(""):'<div class="empty">لا يوجد زبائن بعد.</div>')+'</section>'}
+function modal(title,html){$("#modalTitle").textContent=title;$("#modalBody").innerHTML=html;$("#modal").classList.add("open")}
+function grid(ctx,w,h){ctx.fillStyle="#fff";ctx.fillRect(0,0,w,h);for(let x=0;x<=w;x+=10){ctx.beginPath();ctx.strokeStyle=x%50===0?"#cbd5e1":"#edf1f5";ctx.lineWidth=x%50===0?1.2:.6;ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke()}for(let y=0;y<=h;y+=10){ctx.beginPath();ctx.strokeStyle=y%50===0?"#cbd5e1":"#edf1f5";ctx.lineWidth=y%50===0?1.2:.6;ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}}
+function paint(){grid(ctx,canvas.width,canvas.height);for(const s of strokes){if(!s.length)continue;ctx.beginPath();ctx.strokeStyle="#172f52";ctx.lineWidth=4;ctx.lineCap="round";ctx.lineJoin="round";s.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke()}dimensionLabels.forEach(d=>{ctx.save();ctx.fillStyle="#1d4ed8";ctx.font="bold 25px Tahoma";ctx.textAlign="center";ctx.textBaseline="bottom";ctx.fillText(d.label,(d.a.x+d.b.x)/2,(d.a.y+d.b.y)/2-8);ctx.restore()})}
+function newJob(){draftPhotos=[];strokes=[];modal("إنشاء طلب جديد",`<form id="jobForm"><div class="formgrid">
+<div class="field"><label>اسم الزبون *</label><input name="customer" required></div>
+<div class="field"><label>رقم الهاتف</label><input name="phone" inputmode="tel"></div>
+<div class="field"><label>وصف القطعة *</label><input name="description" required></div>
+<div class="field full"><label>نوع الخدمة — يمكنك اختيار عدة خدمات</label>
+<div class="service-picks" id="servicePicks">
+<label><input type="checkbox" name="serviceChoice" value="قص ليزر" checked> قص ليزر</label>
+<label><input type="checkbox" name="serviceChoice" value="قص مقص"> قص مقص</label>
+<label><input type="checkbox" name="serviceChoice" value="ثني CNC"> ثني CNC</label>
+<label><input type="checkbox" name="serviceChoice" value="تجميع"> تجميع</label>
+<label><input type="checkbox" name="serviceChoice" value="كبائن مصاعد"> كبائن مصاعد</label>
+<label><input type="checkbox" name="serviceChoice" value="خدمة أخرى"> خدمة أخرى</label>
+</div><input type="hidden" name="service" id="serviceValue" value="قص ليزر">
+<div class="hint">يمكنك تحديد أكثر من خدمة للطلب الواحد.</div></div>
+<div class="field"><label>المادة</label><input name="material" placeholder="Inox 304"></div>
+<div class="field"><label>السماكة mm</label><input name="thickness" type="number" step=".1"></div>
+<div class="field"><label>الأبعاد mm</label><input name="dimensions" placeholder="مثال 1000 × 2000"></div>
+<div class="field full"><label>مصدر المادة</label><select name="materialSource" id="materialSource"><option value="customer" selected>الزبون أحضر المادة — لا تخصم من المخزون</option><option value="workshop">من مخزون الورشة — تخصم عند بدء الإنتاج</option></select><div class="hint">مواد الزبون لا تخصم من مخزون الورشة.</div></div>
+<div class="field full" id="stockPickWrap" style="display:none"><label>اختر المادة من مخزون الورشة (المنطقة B)</label><select name="stockItemId" id="stockItemId"><option value="">اختر صنف المخزون</option>${db.stock.filter(x=>(x.zone||"A")==="B" && Number(x.qty||0)>0).map(x=>`<option value="${esc(x.id)}">${esc(x.name)} — ${esc(x.material||"")} — ${esc(x.thickness||"")}mm — متاح ${esc(x.qty)} ${esc(x.unit||"قطعة")}</option>`).join("")}</select><label>الكمية المطلوب صرفها</label><input name="stockQty" type="number" min="0.01" step="0.01" value="1"></div>
+<div class="field"><label>الكمية</label><input name="qty" type="number" min="1" value="1" required></div>
+<div class="field"><label>مدة الإنجاز</label><select name="duration"><option>يوم واحد</option><option>يومان</option><option>3 أيام</option><option>أسبوع</option><option>تحدد لاحقاً</option></select></div>
+<div class="field full"><label>تفاصيل العمليات والأسعار — تظهر في BON CLIENT فقط</label><div id="operationsEditor" class="ops-editor"><div id="operationsRows" class="operations-list"></div><button type="button" class="btn soft add-op-btn" id="addOperation">＋ إضافة عملية</button></div></div>
+<div class="field"><label>إجمالي الفاتورة (دج)</label><input name="total" id="jobTotal" type="number" min="0" value="0" readonly></div>
+<div class="field"><label>المدفوع (دج)</label><input name="paid" type="number" min="0" value="0"></div>
+<div class="field full"><label>ملاحظات التصنيع</label><textarea name="notes" placeholder="التفاصيل والملاحظات..."></textarea></div>
+<div class="field full"><div class="kroki" id="kroki"><div class="khead"><b>الكروكي والرسم الهندسي</b><span>مساحة صغيرة قابلة للتكبير</span></div><div class="tools">
+<button type="button" class="tool active" data-tool="pen">قلم</button><button type="button" class="tool" data-tool="move">تحريك</button><button type="button" class="tool" data-tool="eraser">ممحاة</button>
+<button type="button" class="tool" data-tool="line">خط</button><button type="button" class="tool" data-tool="rect">مستطيل</button>
+<button type="button" class="tool" data-tool="circle">دائرة</button><button type="button" class="tool" data-tool="triangle">مثلث</button>
+<button type="button" class="tool" data-tool="arrow">سهم</button><button type="button" class="tool" data-tool="dimension">قياس</button>
+<button type="button" class="tool" data-tool="text">كتابة</button><button type="button" data-act="undo">تراجع</button>
+<button type="button" data-act="redo">إعادة</button><button type="button" data-act="clear">مسح الكل</button>
+<button type="button" data-act="zoomout">−</button><button type="button" data-act="zoomin">+</button>
+<button type="button" data-act="expand">تكبير الشاشة</button><button type="button" data-act="gallery">اختيار صورة من المجلد</button><button type="button" data-act="camera">التصوير بالكاميرا</button>
+</div><div class="tools"><label class="hint">سماكة الخط <select id="lineWidth"><option value="2">رفيع</option><option value="4" selected>متوسط</option><option value="7">عريض</option></select></label><label class="hint"><input id="gridToggle" type="checkbox" checked> شبكة مليمترية</label></div><div class="canvaswrap"><canvas class="canvas" width="1000" height="560"></canvas></div><div class="hint">اختر «قياس» واسحب خطاً ثم أدخل القيمة يدوياً. اختر «تحريك» لسحب القياس أو أي شكل إلى موضعه المناسب.</div><input id="galleryInput" type="file" accept="image/*" hidden><input id="cameraInput" type="file" accept="image/*" capture="environment" hidden><div class="photos" id="photos"></div></div></div>
+</div><div class="actions"><button class="btn primary">حفظ الطلب</button><button type="button" class="btn" id="cancel">إلغاء</button></div></form>`);
+canvas=$(".canvas");ctx=canvas.getContext("2d");paint();let active=null;
+const opRows=$("#operationsRows"),totalInput=$("#jobTotal");
+function addOperationRow(name="",qty=1,unit=0,serviceAuto=false){const tr=document.createElement("div");tr.className="operation-card";if(serviceAuto){tr.dataset.serviceAuto="1";tr.dataset.serviceName=name;}tr.innerHTML=`<div class="operation-card-head"><b>تفاصيل العملية</b><button type="button" class="op-remove" title="حذف العملية">حذف ×</button></div><label class="op-field"><span>اسم العملية</span><input class="op-name" placeholder="مثال: قص ليزر" value="${esc(name)}"></label><div class="op-numbers"><label class="op-field"><span>الكمية</span><input class="op-qty" type="number" min="0" step="1" value="${qty}"></label><label class="op-field"><span>سعر الوحدة (دج)</span><input class="op-unit" type="number" min="0" step="0.01" value="${unit}"></label></div><div class="operation-total"><span>إجمالي العملية</span><strong class="op-line-total">0 دج</strong></div>`;opRows.appendChild(tr);tr.querySelectorAll("input").forEach(i=>i.oninput=updateOperationsTotal);tr.querySelector(".op-remove").onclick=()=>{tr.remove();updateOperationsTotal()};updateOperationsTotal()}function readOperations(){return [...opRows.querySelectorAll(".operation-card")].map(tr=>({name:tr.querySelector(".op-name").value.trim(),qty:Number(tr.querySelector(".op-qty").value||0),unitPrice:Number(tr.querySelector(".op-unit").value||0)})).filter(o=>o.name||o.qty||o.unitPrice).map(o=>({...o,lineTotal:o.qty*o.unitPrice}))}
+function updateOperationsTotal(){let sum=0;opRows.querySelectorAll(".operation-card").forEach(tr=>{let q=Number(tr.querySelector(".op-qty").value||0),u=Number(tr.querySelector(".op-unit").value||0),v=q*u;sum+=v;tr.querySelector(".op-line-total").textContent=v.toLocaleString("fr-DZ")+" دج"});totalInput.value=sum.toFixed(2)}
+$("#addOperation").onclick=()=>addOperationRow("",1,0);
+$("#materialSource").onchange=()=>{$("#stockPickWrap").style.display=$("#materialSource").value==="workshop"?"block":"none"};
+const serviceChecks=[...$("#servicePicks").querySelectorAll('input[name="serviceChoice"]')];
+function syncServices(){
+ const selected=serviceChecks.filter(c=>c.checked).map(c=>c.value);
+ $("#serviceValue").value=selected.join("، ");
+ opRows.querySelectorAll('.operation-card[data-service-auto="1"]').forEach(row=>{if(!selected.includes(row.dataset.serviceName))row.remove()});
+ selected.forEach(name=>{const exists=[...opRows.querySelectorAll('.operation-card[data-service-auto="1"]')].some(row=>row.dataset.serviceName===name);if(!exists)addOperationRow(name,Number($("#jobForm [name=qty]").value||1),0,true)});
+ updateOperationsTotal();return selected;
+}
+serviceChecks.forEach(c=>c.onchange=()=>{syncServices();});
+syncServices();
+$("#jobForm [name=qty]").oninput=()=>{const first=opRows.querySelector(".op-qty");if(first&&!first.dataset.touched)first.value=$("#jobForm [name=qty]").value;updateOperationsTotal()};
+opRows.addEventListener("input",e=>{if(e.target.classList.contains("op-qty"))e.target.dataset.touched="1"});
+const point=e=>{const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*canvas.width/r.width,y:(e.clientY-r.top)*canvas.height/r.height}};
+$("#kroki").querySelectorAll("[data-tool]").forEach(b=>b.onclick=()=>{$("#kroki").querySelectorAll("[data-tool]").forEach(x=>x.classList.remove("active"));b.classList.add("active");activeTool=b.dataset.tool});
+canvas.onpointerdown=e=>{e.preventDefault();canvas.setPointerCapture(e.pointerId);if(activeTool==="dimension"){dimensionStart=point(e);return}active=[];strokes.push(active);active.push(point(e));paint()};
+canvas.onpointermove=e=>{if(active){active.push(point(e));paint()}};
+canvas.onpointerup=e=>{if(activeTool==="dimension"&&dimensionStart){const end=point(e),value=prompt("أدخل المقاس يدوياً (مثال: 1250 mm أو 45 cm):","");if(value&&value.trim()){strokes.push([dimensionStart,end]);dimensionLabels.push({a:dimensionStart,b:end,label:value.trim()});paint()}dimensionStart=null}active=null};
+canvas.onpointercancel=()=>{active=null;dimensionStart=null};
+$("#kroki").querySelectorAll("[data-act]").forEach(b=>b.onclick=()=>{let a=b.dataset.act;if(a==="undo"){if(dimensionLabels.length){dimensionLabels.pop();strokes.pop()}else strokes.pop();paint()}if(a==="clear"){strokes=[];dimensionLabels=[];paint()}if(a==="zoomin"||a==="zoomout"){zoom=Math.max(.7,Math.min(2.5,zoom+(a==="zoomin"?.25:-.25)));canvas.style.transform=`scale(${zoom})`;canvas.style.transformOrigin="top center"}if(a==="expand")$("#kroki").classList.toggle("expanded");if(a==="camera")$("#cameraInput").click();if(a==="gallery")$("#galleryInput").click()});
+async function importPhotos(input){for(const file of Array.from(input.files||[])){if(!file.type.startsWith("image/"))continue;const data=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)});draftPhotos.push(data);showPhotos()}input.value=""}
+$("#galleryInput").onchange=e=>importPhotos(e.target);
+$("#cameraInput").onchange=e=>importPhotos(e.target);
+function showPhotos(){$("#photos").innerHTML=draftPhotos.map((p,i)=>`<div class="photo"><img src="${p}"><button type="button" data-rm="${i}">×</button></div>`).join("");$("#photos").querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{draftPhotos.splice(+b.dataset.rm,1);showPhotos()})}
+$("#cancel").onclick=()=>$("#modal").classList.remove("open");
+sdBindTools();
+$("#jobForm").onsubmit=e=>{e.preventDefault();const f=new FormData(e.target);const total=Number(f.get("total")||0),paid=Number(f.get("paid")||0);if(paid>total){alert("المدفوع لا يمكن أن يتجاوز الإجمالي");return}const selectedServices=f.getAll("serviceChoice");if(!selectedServices.length){alert("اختر خدمة واحدة على الأقل");return}
+if(f.get("materialSource")==="workshop"){const chosen=db.stock.find(x=>x.id===f.get("stockItemId"));const need=Number(f.get("stockQty")||0);if(!chosen){alert("اختر مادة موجودة في مخزون الورشة");return}if((chosen.zone||"A")!=="B"){alert("المادة يجب أن تكون في المنطقة B (معتمدة وجاهزة للإنتاج)");return}if(need<=0||need>Number(chosen.qty||0)){alert("الكمية المطلوبة غير صحيحة أو أكبر من المتاح في المخزون");return}}
+const operations=readOperations();const job={id:id(),operations,total:operations.length?operations.reduce((a,o)=>a+o.lineTotal,0):total,paid,customer:f.get("customer"),phone:f.get("phone"),description:f.get("description"),service:f.get("service"),services:selectedServices,materialSource:f.get("materialSource")||"customer",stockItemId:f.get("stockItemId")||"",stockQty:Number(f.get("stockQty")||0),stockDeducted:false,productionStages:selectedServices.map(name=>({name,status:"انتظار",startedAt:null,completedAt:null})),material:f.get("material"),thickness:f.get("thickness"),dimensions:f.get("dimensions"),qty:+f.get("qty"),duration:f.get("duration"),notes:f.get("notes"),drawing:strokes.length?canvas.toDataURL("image/png"):null,sketch:strokes,dimensionLabels:dimensionLabels.slice(),photos:draftPhotos.slice(),status:"جديد",createdAt:new Date().toISOString()};db.jobs.push(job);save();$("#modal").classList.remove("open");page="jobs";render();detail(job.id)};}
+
+function editJob(key){
+ const j=db.jobs.find(x=>x.id===key);if(!j)return;
+ const currentServices=(j.services&&j.services.length)?j.services:(j.service?[j.service]:[]);
+ const ops=Array.isArray(j.operations)?j.operations:[];
+ modal("تعديل تفاصيل الطلبية · "+j.id,`<form id="editJobForm">
+ <div class="formgrid">
+ <div class="field"><label>اسم الزبون *</label><input name="customer" required value="${esc(j.customer||"")}"></div>
+ <div class="field"><label>رقم الهاتف</label><input name="phone" value="${esc(j.phone||"")}"></div>
+ <div class="field full"><label>وصف القطعة *</label><input name="description" required value="${esc(j.description||"")}"></div>
+ <div class="field full"><label>الخدمات المطلوبة</label><div class="service-picks">
+ ${["قص ليزر","قص مقص","ثني CNC","تجميع","كبائن مصاعد","خدمة أخرى"].map(v=>`<label><input type="checkbox" name="editService" value="${v}" ${currentServices.includes(v)?"checked":""}> ${v}</label>`).join("")}
+ </div></div>
+ <div class="field"><label>المادة</label><input name="material" value="${esc(j.material||"")}"></div>
+ <div class="field"><label>السماكة (mm)</label><input name="thickness" type="number" step=".1" value="${esc(j.thickness||"")}"></div>
+ <div class="field"><label>الأبعاد (mm)</label><input name="dimensions" value="${esc(j.dimensions||"")}"></div>
+ <div class="field"><label>الكمية</label><input name="qty" type="number" min="1" required value="${esc(j.qty||1)}"></div>
+ <div class="field"><label>مدة الإنجاز</label><select name="duration">${["يوم واحد","يومان","3 أيام","أسبوع","تحدد لاحقاً"].map(v=>`<option ${j.duration===v?"selected":""}>${v}</option>`).join("")}</select></div>
+ <div class="field full"><label>تفاصيل العمليات والأسعار (BON CLIENT فقط)</label><div id="editOps">${ops.map((o,i)=>`<div class="operation-card"><div class="operation-card-head"><b>عملية ${i+1}</b><button type="button" class="op-remove">حذف ×</button></div><label class="op-field"><span>اسم العملية</span><input class="edit-op-name" value="${esc(o.name||"")}"></label><div class="op-numbers"><label class="op-field"><span>الكمية</span><input class="edit-op-qty" type="number" min="0" step="1" value="${Number(o.qty||0)}"></label><label class="op-field"><span>سعر الوحدة (دج)</span><input class="edit-op-unit" type="number" min="0" step=".01" value="${Number(o.unitPrice||0)}"></label></div></div>`).join("")}</div><button type="button" class="btn soft" id="editAddOp">＋ إضافة عملية</button></div>
+ <div class="field full"><label>ملاحظات التصنيع</label><textarea name="notes">${esc(j.notes||"")}</textarea></div>
+ <div class="field full"><div class="hint">مصدر المادة: ${j.materialSource==="workshop"?"مخزون الورشة":"الزبون أحضر المادة"}. لا يغيّر هذا التعديل سجل صرف المخزون السابق.</div></div>
+ </div><div class="actions"><button class="btn primary" type="submit">حفظ التعديلات</button><button class="btn" type="button" id="editCancel">إلغاء</button></div></form>`);
+ const opsBox=$("#editOps");
+ function addEditOp(name="",qty=Number(j.qty||1),unit=0){
+   const n=opsBox.querySelectorAll(".operation-card").length+1,div=document.createElement("div");div.className="operation-card";
+   div.innerHTML=`<div class="operation-card-head"><b>عملية ${n}</b><button type="button" class="op-remove">حذف ×</button></div><label class="op-field"><span>اسم العملية</span><input class="edit-op-name" value="${esc(name)}"></label><div class="op-numbers"><label class="op-field"><span>الكمية</span><input class="edit-op-qty" type="number" min="0" step="1" value="${qty}"></label><label class="op-field"><span>سعر الوحدة (دج)</span><input class="edit-op-unit" type="number" min="0" step=".01" value="${unit}"></label></div>`;
+   opsBox.appendChild(div);div.querySelector(".op-remove").onclick=()=>div.remove();
+ }
+ opsBox.querySelectorAll(".op-remove").forEach(b=>b.onclick=()=>b.closest(".operation-card").remove());
+ $("#editAddOp").onclick=()=>addEditOp();
+ $("#editCancel").onclick=()=>$("#modal").classList.remove("open");
+ $("#editJobForm").onsubmit=e=>{
+   e.preventDefault();const f=new FormData(e.target),selected=f.getAll("editService");
+   if(!selected.length){alert("اختر خدمة واحدة على الأقل");return}
+   const updatedOps=[...opsBox.querySelectorAll(".operation-card")].map(r=>{const qty=Number(r.querySelector(".edit-op-qty").value||0),unitPrice=Number(r.querySelector(".edit-op-unit").value||0);return{name:r.querySelector(".edit-op-name").value.trim(),qty,unitPrice,lineTotal:qty*unitPrice}}).filter(o=>o.name||o.qty||o.unitPrice);
+   const newTotal=updatedOps.length?updatedOps.reduce((sum,o)=>sum+o.lineTotal,0):Number(j.total||0);
+   if(Number(j.paid||0)>newTotal){alert("الإجمالي الجديد أقل من المبلغ المدفوع. عدّل العمليات أو المدفوع أولاً.");return}
+   const previousStages=j.productionStages||[];
+   const stageMap=new Map(previousStages.map(st=>[st.name,st]));
+   j.customer=f.get("customer").trim();j.phone=f.get("phone").trim();j.description=f.get("description").trim();
+   j.services=selected;j.service=selected.join("، ");j.material=f.get("material");j.thickness=f.get("thickness");j.dimensions=f.get("dimensions");j.qty=Number(f.get("qty")||1);j.duration=f.get("duration");j.notes=f.get("notes");
+   j.operations=updatedOps;if(updatedOps.length)j.total=newTotal;
+   j.productionStages=selected.map(name=>stageMap.get(name)||({name,status:"انتظار",startedAt:null,completedAt:null}));
+   j.updatedAt=new Date().toISOString();save();detail(key);
+ };
+}
+function detail(key){const j=db.jobs.find(x=>x.id===key);if(!j)return;if(!Array.isArray(j.productionStages))j.productionStages=(j.services||[j.service]).filter(Boolean).map(name=>({name,status:"انتظار",startedAt:null,completedAt:null}));modal("تفاصيل الطلب · "+j.id,`<div class="card"><b>${esc(j.customer)}</b><p class="muted">${esc(j.phone)} · ${esc(j.description)}</p><p>الخدمات: ${esc((j.services&&j.services.length)?j.services.join("، "):j.service)} </p><p>${esc(j.material)} · ${esc(j.thickness)} mm · ${esc(j.dimensions)} · الكمية ${j.qty}</p><p>${esc(j.notes)}</p><p>مصدر المادة: ${j.materialSource==="workshop"?"مخزون الورشة":"الزبون أحضر المادة"}${j.materialSource==="workshop"&&j.stockIssue?` · تم صرف ${esc(j.stockIssue.qty)} ${esc(j.stockIssue.unit)} من ${esc(j.stockIssue.itemName)}`:""}</p><span class="pill">${esc(j.status)}</span></div><section class="panel"><h2>مراحل الإنتاج</h2>${(j.productionStages||((j.services||[j.service]).filter(Boolean).map(name=>({name,status:"انتظار"})))).map((st,i)=>`<div class="job"><div class="jobtop"><b>${esc(st.name)}</b><span class="pill">${esc(st.status||"انتظار")}</span></div><div class="actions"><button class="btn soft" data-stage-start="${i}" ${st.status==="مكتمل"||st.status==="قيد التنفيذ"?"disabled":""}>بدء العملية</button><button class="btn" data-stage-done="${i}" ${st.status!=="قيد التنفيذ"?"disabled":""}>إكمال العملية</button></div></div>`).join("")}</section><section class="panel"><h2>الكروكي وصور النموذج</h2>${j.drawing?`<img style="width:100%;border:1px solid #ddd;border-radius:8px" src="${j.drawing}">`:''}${(Array.isArray(j.photos)?j.photos:[]).map(p=>`<img style="width:100%;max-height:240px;object-fit:contain;margin-top:8px" src="${p}">`).join("")||'<div class="empty">لا توجد صور مرفقة.</div>'}</section><div class="actions"><button class="btn primary" id="editJob">✎ تعديل تفاصيل الطلبية</button>${j.status==="قيد التنفيذ"&&(j.productionStages||[]).length>0&&(j.productionStages||[]).every(x=>x.status==="مكتمل")?`<button class="btn primary" id="finishProduction">إنهاء ملف الإنتاج · جاهز للتسليم</button>`:""}<button class="btn soft" id="status" ${j.status!=="جديد"?"disabled":""}>بدء الإنتاج</button><button class="btn" id="of">طباعة أمر التصنيع OF · A4</button><button class="btn" id="bon">طباعة BON CLIENT · 80mm</button><button class="btn" id="label">طباعة ملصق القطعة</button><button class="btn danger" id="del">حذف الطلب</button></div>`);$("#editJob").onclick=()=>editJob(key);
+$("#status").onclick=()=>{
+ if(j.status!=="جديد")return;
+ if(j.materialSource==="workshop"&&!j.stockDeducted){
+   const item=db.stock.find(x=>x.id===j.stockItemId),need=Number(j.stockQty||0);
+   if(!item||Number(item.qty||0)<need){alert("تعذر بدء الإنتاج: كمية المادة غير متوفرة في المخزون.");return}
+   item.qty=Number(item.qty)-need;j.stockDeducted=true;j.stockIssue={itemId:item.id,itemName:item.name,qty:need,unit:item.unit||"قطعة",issuedAt:new Date().toISOString()};
+ }
+ j.status="قيد التنفيذ";if(!Array.isArray(j.productionStages))j.productionStages=(j.services||[j.service]).filter(Boolean).map(name=>({name,status:"انتظار"}));
+ save();detail(key)
+};
+$("#finishProduction")?.addEventListener("click",()=>markReady(key));$("#del").onclick=()=>{if(confirm("حذف الطلب نهائياً؟")){db.jobs=db.jobs.filter(x=>x.id!==key);save();$("#modal").classList.remove("open");render()}};$("#of").onclick=()=>printOF(j);$("#bon").onclick=()=>printBON(j);$("#label").onclick=()=>printLabel(j);
+document.querySelectorAll("[data-stage-start]").forEach(b=>b.onclick=()=>{const st=j.productionStages?.[Number(b.dataset.stageStart)];if(!st)return;if(j.status==="جديد"){alert("ابدأ الإنتاج أولاً من زر بدء / إنهاء الإنتاج بعد التأكد من المادة.");return}st.status="قيد التنفيذ";st.startedAt=new Date().toISOString();save();detail(key)});
+document.querySelectorAll("[data-stage-done]").forEach(b=>b.onclick=()=>{const st=j.productionStages?.[Number(b.dataset.stageDone)];if(!st)return;st.status="مكتمل";st.completedAt=new Date().toISOString();save();detail(key)});
+}
+function markReady(key){
+ const j=db.jobs.find(x=>x.id===key);if(!j)return;
+ const stages=Array.isArray(j.productionStages)?j.productionStages:[];
+ if(j.status!=="قيد التنفيذ"||!stages.length||stages.some(st=>st.status!=="مكتمل")){
+   alert("لا يمكن إنهاء ملف الإنتاج قبل إكمال جميع مراحل التصنيع.");return;
+ }
+ if(!confirm("تأكيد إنهاء ملف الإنتاج؟ ستصبح حالة الطلب: جاهز للتسليم."))return;
+ j.status="جاهز للتسليم";j.productionCompletedAt=new Date().toISOString();save();
+ if(document.querySelector("#modal")?.classList.contains("open"))detail(key);else{page="production";render();}
+}
+function printOF(j){const w=window.open("","_blank");if(!w){alert("اسمح بالنوافذ المنبثقة للطباعة");return}w.document.write(`<html lang="ar" dir="rtl"><meta charset="utf-8"><title>OF ${j.id}</title><style>body{font-family:Tahoma;padding:22px;color:#182536}h1{text-align:center}img{max-width:100%;max-height:65vh;display:block;margin:12px auto}p{line-height:1.9;border-bottom:1px solid #ddd;padding:6px}</style><h1>STEEL DESIGN · أمر التصنيع OF</h1><p>المرجع: ${esc(j.id)}</p><p>الزبون: ${esc(j.customer)}</p><p>القطعة: ${esc(j.description)}</p><p>الخدمات: ${esc((j.services&&j.services.length)?j.services.join("، "):j.service)} · المادة: ${esc(j.material)} · السماكة: ${esc(j.thickness)} mm</p><p>الأبعاد: ${esc(j.dimensions)} · الكمية: ${j.qty}</p><p>ملاحظات: ${esc(j.notes)}</p><h2>الكروكي</h2>${j.drawing?`<img src="${j.drawing}">`:""}<h2>صور النموذج</h2>${j.photos.map(p=>`<img src="${p}">`).join("")}<script>window.onload=()=>window.print()<\/script></html>`);w.document.close()}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{page=b.dataset.page;render()});
+$("#close").onclick=()=>$("#modal").classList.remove("open");
+$("#backup").onclick=()=>{const blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="steel-design-v9-backup.json";a.click();URL.revokeObjectURL(a.href)};
+render();
+</script>
+
+<script>
+/* V10.0 – rebuilt canvas interaction layer */
+let sdTool="pen", sdRedo=[], sdGrid=true, sdSelected=null, sdPressTimer=null, sdGesture=null;
+function sdNormalize(){
+ strokes=(strokes||[]).map(x=>Array.isArray(x)?{tool:"pen",points:x,width:4}:x).filter(x=>x&&Array.isArray(x.points)&&x.points.length);
+}
+function sdBounds(sh){const ps=sh.points||[];if(!ps.length)return{x:0,y:0,w:0,h:0};let xs=ps.map(p=>p.x),ys=ps.map(p=>p.y);return{x:Math.min(...xs),y:Math.min(...ys),w:Math.max(1,Math.max(...xs)-Math.min(...xs)),h:Math.max(1,Math.max(...ys)-Math.min(...ys))}}
+function sdDrawShape(c,sh){
+ if(!sh?.points?.length)return;const ps=sh.points,a=ps[0],b=ps[ps.length-1]||a;
+ c.save();c.strokeStyle=sh.tool==="eraser"?"#fff":"#172f52";c.fillStyle="#172f52";c.lineWidth=sh.tool==="eraser"?30:Number(sh.width||4);c.lineCap="round";c.lineJoin="round";
+ if(sh.tool==="pen"||sh.tool==="eraser"){c.beginPath();ps.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.stroke()}
+ else if(sh.tool==="line"){c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke()}
+ else if(sh.tool==="rect"){c.strokeRect(Math.min(a.x,b.x),Math.min(a.y,b.y),Math.abs(b.x-a.x),Math.abs(b.y-a.y))}
+ else if(sh.tool==="circle"){c.beginPath();c.ellipse((a.x+b.x)/2,(a.y+b.y)/2,Math.max(1,Math.abs(b.x-a.x)/2),Math.max(1,Math.abs(b.y-a.y)/2),0,0,Math.PI*2);c.stroke()}
+ else if(sh.tool==="triangle"){c.beginPath();c.moveTo((a.x+b.x)/2,a.y);c.lineTo(b.x,b.y);c.lineTo(a.x,b.y);c.closePath();c.stroke()}
+ else if(sh.tool==="arrow"){let q=Math.atan2(b.y-a.y,b.x-a.x),L=22;c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.moveTo(b.x,b.y);c.lineTo(b.x-L*Math.cos(q-.55),b.y-L*Math.sin(q-.55));c.moveTo(b.x,b.y);c.lineTo(b.x-L*Math.cos(q+.55),b.y-L*Math.sin(q+.55));c.stroke()}
+ else if(sh.tool==="dimension"){c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke();let q=Math.atan2(b.y-a.y,b.x-a.x),L=13;[a,b].forEach((p,i)=>{let z=q+(i?Math.PI:0);c.beginPath();c.moveTo(p.x,p.y);c.lineTo(p.x-L*Math.cos(z-.5),p.y-L*Math.sin(z-.5));c.moveTo(p.x,p.y);c.lineTo(p.x-L*Math.cos(z+.5),p.y-L*Math.sin(z+.5));c.stroke()});c.fillStyle="#1d4ed8";c.font="bold 25px Tahoma";c.textAlign="center";c.textBaseline="bottom";c.fillText(sh.label||"",(a.x+b.x)/2+(sh.labelDx||0),(a.y+b.y)/2-10+(sh.labelDy||0))}
+ else if(sh.tool==="text"){c.font="bold 28px Tahoma";c.fillText(sh.text||"نص",a.x,a.y)}
+ c.restore();
+}
+function sdRedraw(preview=null){if(!canvas||!ctx)return;ctx.clearRect(0,0,canvas.width,canvas.height);if(sdGrid)grid(ctx,canvas.width,canvas.height);else{ctx.fillStyle="#fff";ctx.fillRect(0,0,canvas.width,canvas.height)}strokes.forEach(x=>sdDrawShape(ctx,x));if(preview)sdDrawShape(ctx,preview);if(sdSelected){let b=sdBounds(sdSelected);ctx.save();ctx.strokeStyle="#2563eb";ctx.lineWidth=3;ctx.setLineDash([9,6]);ctx.strokeRect(b.x-15,b.y-15,b.w+30,b.h+30);ctx.setLineDash([]);ctx.fillStyle="#2563eb";ctx.beginPath();ctx.arc(b.x+b.w,b.y+b.h,6,0,Math.PI*2);ctx.fill();ctx.restore()}}
+function sdPersist(){try{localStorage.setItem(KEY+"-sketch-draft",JSON.stringify(strokes))}catch(e){}}
+function sdHit(sh,p){let b=sdBounds(sh),pad=25;if(p.x<b.x-pad||p.x>b.x+b.w+pad||p.y<b.y-pad||p.y>b.y+b.h+pad)return false;return true}
+function sdBindTools(){
+ const root=document.querySelector("#kroki");if(!root||!canvas||!ctx)return;sdNormalize();
+ const pos=e=>{const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*canvas.width/r.width,y:(e.clientY-r.top)*canvas.height/r.height}};
+ const cancel=()=>{if(sdPressTimer)clearTimeout(sdPressTimer);sdPressTimer=null};
+ root.querySelectorAll("[data-tool]").forEach(btn=>{btn.onclick=(ev)=>{ev.preventDefault();sdTool=btn.dataset.tool;root.querySelectorAll("[data-tool]").forEach(x=>x.classList.toggle("active",x===btn));};});
+ canvas.style.touchAction="none";canvas.style.userSelect="none";canvas.style.webkitUserSelect="none";canvas.oncontextmenu=e=>e.preventDefault();
+ canvas.onpointerdown=e=>{
+  if(e.pointerType==="mouse"&&e.button!==0)return;e.preventDefault();try{canvas.setPointerCapture(e.pointerId)}catch(_){}
+  const p=pos(e);let hit=-1;for(let i=strokes.length-1;i>=0;i--)if(sdHit(strokes[i],p)){hit=i;break}
+  sdGesture={id:e.pointerId,start:p,last:p,mode:"pending",hit,shape:null,moved:false};sdSelected=null;
+  if(hit>=0){const g=sdGesture;sdPressTimer=setTimeout(()=>{if(sdGesture===g&&!g.moved){g.mode="move";g.prev=g.start;sdSelected=strokes[g.hit];if(navigator.vibrate)navigator.vibrate(20);sdRedraw()}},550);}
+ };
+ canvas.onpointermove=e=>{
+  const g=sdGesture;if(!g||g.id!==e.pointerId)return;e.preventDefault();const p=pos(e);g.last=p;
+  if(g.mode==="move"&&g.hit>=0){const sh=strokes[g.hit],dx=p.x-g.prev.x,dy=p.y-g.prev.y;sh.points=sh.points.map(q=>({x:q.x+dx,y:q.y+dy}));g.prev=p;sdSelected=sh;sdRedraw();return}
+  if(g.mode==="pending"&&Math.hypot(p.x-g.start.x,p.y-g.start.y)>8){g.moved=true;cancel();if(g.hit>=0){g.mode="cancelled";sdSelected=strokes[g.hit];sdRedraw();return}g.mode="draw";g.shape={tool:sdTool,points:[g.start,p],width:Number(root.querySelector("#lineWidth")?.value||4)};}
+  if(g.mode==="move"&&!g.prev)g.prev=g.start;
+  if(g.mode==="draw"){if(g.shape.tool==="pen"||g.shape.tool==="eraser")g.shape.points.push(p);else g.shape.points=[g.start,p];sdRedraw(g.shape)}
+ };
+ canvas.onpointerup=e=>{
+  const g=sdGesture;if(!g||g.id!==e.pointerId)return;e.preventDefault();cancel();const p=pos(e);
+  if(g.mode==="move"){sdSelected=null;sdPersist();sdRedraw()}
+  else if(g.mode==="pending"&&g.hit>=0){sdSelected=strokes[g.hit];sdRedraw()}
+  else if(g.mode==="draw"&&g.shape){let sh=g.shape;if(sh.tool!=="pen"&&sh.tool!=="eraser")sh.points=[g.start,p];if(Math.hypot(p.x-g.start.x,p.y-g.start.y)<5&&!["pen","eraser","text"].includes(sh.tool)){sdGesture=null;sdRedraw();alert("اسحب إصبعك لتحديد حجم الشكل");return}
+    if(sh.tool==="dimension"){let val=prompt("أدخل المقاس يدوياً (مثال: 1250 mm أو 45 cm):","");if(!val||!val.trim()){sdGesture=null;sdRedraw();return}sh.label=val.trim()}
+    if(sh.tool==="text"){let val=prompt("اكتب النص:","");if(!val){sdGesture=null;sdRedraw();return}sh.text=val}
+    strokes.push(sh);sdRedo=[];sdPersist();sdRedraw();
+  }
+  sdGesture=null;
+ };
+ canvas.onpointercancel=()=>{cancel();sdGesture=null;sdRedraw()};
+ root.querySelectorAll("[data-act]").forEach(btn=>btn.onclick=()=>{let a=btn.dataset.act;if(a==="undo"&&strokes.length){sdRedo.push(strokes.pop());sdSelected=null}if(a==="redo"&&sdRedo.length){strokes.push(sdRedo.pop());sdSelected=null}if(a==="clear"&&confirm("مسح كل الرسم؟")){strokes=[];sdRedo=[];sdSelected=null}if(["undo","redo","clear"].includes(a)){sdPersist();sdRedraw()}if(a==="zoomin"||a==="zoomout"){zoom=Math.max(.7,Math.min(2.5,zoom+(a==="zoomin"?.25:-.25)));canvas.style.transform=`scale(${zoom})`}if(a==="expand")root.classList.toggle("expanded");
+if(a==="gallery"){const picker=root.querySelector("#galleryInput");if(picker){picker.value="";picker.click()}}
+if(a==="camera"){const picker=root.querySelector("#cameraInput");if(picker){picker.value="";picker.click()}}
+});
+ const gt=root.querySelector("#gridToggle");if(gt){gt.checked=sdGrid;gt.onchange=()=>{sdGrid=gt.checked;sdRedraw()}}
+ try{const saved=JSON.parse(localStorage.getItem(KEY+"-sketch-draft")||"null");if(saved?.length&&!strokes.length)strokes=saved}catch(_){}sdRedraw();
+}
+/* V10.1: canvas tools are bound directly after the new-job modal and legacy handlers are created. */
+</script>
+</body></html>
